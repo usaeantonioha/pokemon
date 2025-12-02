@@ -3,61 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Batalla Neos</title>
+    <title>Pokémon Neos RPG</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="game-container">
+    <div id="transition-overlay"></div>
+
+    <div id="world-container">
+        <div id="game-map">
+            <div id="player-character">🤖</div>
+        </div>
+        
+        <div id="dialogue-box" class="hidden">
+            <p id="dialogue-text">...</p>
+            <span class="arrow">▼</span>
+        </div>
+
+        <div id="controls">
+            <div class="d-pad">
+                <div class="pad-btn up" onclick="movePlayer(0, -1)">▲</div>
+                <div class="pad-btn left" onclick="movePlayer(-1, 0)">◀</div>
+                <div class="pad-btn right" onclick="movePlayer(1, 0)">▶</div>
+                <div class="pad-btn down" onclick="movePlayer(0, 1)">▼</div>
+            </div>
+            <div class="action-btn" onclick="interact()">A</div>
+        </div>
+    </div>
+
+    <div id="battle-container" class="hidden">
         <div class="battle-scene">
             <div class="hud enemy-hud">
                 <div class="info-box">
-                    <span class="name">Avidrón</span> <span class="level">Nv.3</span>
-                    <div class="hp-bar-container">
-                        <div class="hp-bar" id="enemy-hp"></div>
-                    </div>
+                    <span class="name">Rival Solasaur</span> <span class="level">Nv.5</span>
+                    <div class="hp-bar-container"><div class="hp-bar" id="enemy-hp"></div></div>
                 </div>
             </div>
-            
             <div class="sprite-container enemy-pos">
-                <div id="enemy-sprite" class="pokemon-sprite avidron">
-                    <div class="eye"></div>
-                    <div class="wing"></div>
-                </div>
+                <div id="enemy-sprite" class="pokemon-sprite solasaur"></div>
             </div>
-
             <div class="sprite-container player-pos">
-                <div id="player-sprite" class="pokemon-sprite hidrojet">
-                    <div class="shell"></div>
-                    <div class="cannon"></div>
-                </div>
+                <div id="player-sprite" class="pokemon-sprite hidrojet"></div>
             </div>
-
             <div class="hud player-hud">
                 <div class="info-box">
                     <span class="name">Hidrojet</span> <span class="level">Nv.5</span>
-                    <div class="hp-bar-container">
-                        <div class="hp-bar" id="player-hp"></div>
-                    </div>
+                    <div class="hp-bar-container"><div class="hp-bar" id="player-hp"></div></div>
                     <div class="hp-text"><span id="current-hp">25</span>/25</div>
                 </div>
             </div>
         </div>
-
         <div class="control-panel">
-            <div id="dialog-box" class="dialog-box">
-                ¡Un Avidrón salvaje apareció!
-            </div>
-            
-            <div id="action-menu" class="menu hidden">
-                <button onclick="showMoves()">LUCHAR</button>
-                <button onclick="addLog('¡No puedes escapar de una batalla de prueba!')">HUIR</button>
-            </div>
-
-            <div id="move-menu" class="menu hidden">
+            <div id="battle-dialog" class="dialog-box">¡Comienza la batalla!</div>
+            <div id="action-menu" class="menu">
                 <button onclick="playerAttack('pistón')">Golpe Pistón</button>
                 <button onclick="playerAttack('chorro')">Chorro Presión</button>
-                <button onclick="showActions()" class="back-btn">Volver</button>
             </div>
         </div>
     </div>
