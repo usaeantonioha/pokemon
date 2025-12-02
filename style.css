@@ -1,188 +1,176 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-    --bg-color: #f0f8ff;
-    --dialog-bg: #2c3e50;
-    --text-color: #ecf0f1;
-    --hp-green: #2ecc71;
-    --hp-yellow: #f1c40f;
-    --hp-red: #e74c3c;
+    --bg-color: #1a1a1a;
+    --map-bg: #2e2e2e; /* Suelo metálico */
+    --text-color: #fff;
+    --accent: #00ffcc; /* Neon */
 }
 
 body {
     margin: 0;
     padding: 0;
-    font-family: 'Press Start 2P', cursive; /* Fuente tipo pixel art */
-    background-color: #222;
+    font-family: 'Press Start 2P', cursive;
+    background-color: #000;
+    color: var(--text-color);
+    overflow: hidden;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    overflow: hidden;
 }
 
-#game-container {
-    width: 100%;
-    max-width: 400px;
-    height: 100vh;
-    max-height: 800px;
-    background-color: var(--bg-color);
-    display: flex;
-    flex-direction: column;
+/* --- MUNDO --- */
+#world-container {
     position: relative;
-    border: 2px solid #000;
-}
-
-/* --- ESCENA DE BATALLA --- */
-.battle-scene {
-    flex-grow: 1;
-    position: relative;
-    background: linear-gradient(to bottom, #87CEEB 60%, #90EE90 60%); /* Cielo y Pasto */
-}
-
-/* HUD (Barras de vida) */
-.hud {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.9);
-    padding: 10px;
-    border-radius: 5px;
-    border: 2px solid #333;
-    width: 160px;
-    box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
-}
-.enemy-hud { top: 20px; left: 10px; }
-.player-hud { bottom: 40px; right: 10px; }
-
-.name { font-size: 10px; font-weight: bold; display: block; margin-bottom: 5px; color: #000; }
-.level { font-size: 8px; color: #555; }
-.hp-text { font-size: 8px; text-align: right; margin-top: 2px; color: #000;}
-
-.hp-bar-container {
-    width: 100%;
-    height: 10px;
-    background-color: #555;
-    border-radius: 5px;
-    border: 1px solid #000;
+    width: 320px; /* Tamaño Gameboy */
+    height: 320px;
+    background-color: var(--map-bg);
     overflow: hidden;
+    border: 4px solid #555;
 }
 
-.hp-bar {
+#game-map {
+    position: relative;
     width: 100%;
     height: 100%;
-    background-color: var(--hp-green);
-    transition: width 0.5s ease-out, background-color 0.3s;
+    display: grid;
+    grid-template-columns: repeat(10, 32px);
+    grid-template-rows: repeat(10, 32px);
 }
 
-/* --- SPRITES (Pokémon dibujados con CSS) --- */
-.sprite-container {
+/* Tiles del Mapa */
+.tile { width: 32px; height: 32px; box-sizing: border-box; }
+.wall { background-color: #444; border: 1px solid #222; } /* Muro */
+.floor { background-color: #333; border: 1px solid #2a2a2a; } /* Suelo */
+.grass { background-color: #1e3a2a; border: 1px dashed #0f0; opacity: 0.5; } /* Hierba Cyber */
+.door { background-color: #000; border: 2px solid var(--accent); } /* Puerta */
+.house { background-color: #556; border-bottom: 4px solid #334; }
+
+/* Entidades */
+#player-character {
     position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 32px; height: 32px;
+    background: transparent;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 20px;
+    transition: top 0.2s, left 0.2s;
+    z-index: 10;
 }
-.enemy-pos { top: 60px; right: 30px; }
-.player-pos { bottom: 20px; left: 30px; }
 
-.pokemon-sprite {
-    width: 80px;
+.npc {
+    display: flex; justify-content: center; align-items: center;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Diálogo RPG */
+#dialogue-box {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
     height: 80px;
-    position: relative;
-    transition: transform 0.2s;
-}
-
-/* Hidrojet (Azul y Metálico) */
-.hidrojet {
-    background: #3498db;
-    border-radius: 50% 50% 10% 10%;
-    border: 3px solid #2c3e50;
-}
-.hidrojet .shell {
-    position: absolute;
-    top: 20px; left: 10px;
-    width: 60px; height: 40px;
-    background: #95a5a6; /* Gris metal */
-    border-radius: 50%;
-    border: 2px solid #000;
-}
-.hidrojet .cannon {
-    position: absolute;
-    top: 10px; right: -5px;
-    width: 20px; height: 10px;
-    background: #2c3e50;
-}
-
-/* Avidrón (Gris y Rojo) */
-.avidron {
-    background: #bdc3c7; /* Plata */
-    border-radius: 50% 0 50% 50%;
-    border: 3px solid #7f8c8d;
-}
-.avidron .eye {
-    position: absolute;
-    top: 15px; left: 10px;
-    width: 10px; height: 10px;
-    background: red; /* Ojo robótico */
-    border-radius: 50%;
-    box-shadow: 0 0 5px red;
-}
-.avidron .wing {
-    position: absolute;
-    top: 30px; left: -10px;
-    width: 40px; height: 20px;
-    background: #7f8c8d;
-    border-radius: 50% 0 0 50%;
-}
-
-/* Animaciones */
-.shake { animation: shake 0.5s; }
-.attack-anim { transform: translateX(20px); }
-.attack-anim-enemy { transform: translateX(-20px); }
-
-@keyframes shake {
-    0% { transform: translate(1px, 1px) rotate(0deg); }
-    10% { transform: translate(-1px, -2px) rotate(-1deg); }
-    20% { transform: translate(-3px, 0px) rotate(1deg); }
-    30% { transform: translate(3px, 2px) rotate(0deg); }
-    40% { transform: translate(1px, -1px) rotate(1deg); }
-    50% { transform: translate(-1px, 2px) rotate(-1deg); }
-    60% { transform: translate(-3px, 1px) rotate(0deg); }
-    100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* --- PANEL DE CONTROL --- */
-.control-panel {
-    height: 150px;
-    background-color: var(--dialog-bg);
-    border-top: 4px solid #f1c40f; /* Borde dorado */
+    background: #000;
+    border-top: 2px solid #fff;
     padding: 10px;
+    font-size: 10px;
+    line-height: 1.5;
+    z-index: 20;
+}
+#dialogue-box.hidden { display: none; }
+
+/* Controles */
+#controls {
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    box-sizing: border-box;
+    z-index: 100;
+}
+.d-pad {
+    display: grid;
+    grid-template-columns: 40px 40px 40px;
+    gap: 5px;
+}
+.pad-btn {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid #fff;
+    display: flex; justify-content: center; align-items: center;
+    user-select: none;
+    cursor: pointer;
+}
+.pad-btn:active { background: rgba(0,255,204,0.5); }
+.up { grid-column: 2; }
+.left { grid-column: 1; grid-row: 2; }
+.right { grid-column: 3; grid-row: 2; }
+.down { grid-column: 2; grid-row: 2; }
+
+.action-btn {
+    width: 60px; height: 60px;
+    background: #ff3333;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    display: flex; justify-content: center; align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    user-select: none;
+}
+.action-btn:active { background: #cc0000; }
+
+/* --- BATALLA (Estilos reutilizados pero mejorados) --- */
+#battle-container {
+    position: absolute;
+    top: 0; left: 0;
+    width: 320px; height: 320px;
+    background: #222;
+    z-index: 50;
     display: flex;
     flex-direction: column;
 }
+#battle-container.hidden { display: none; }
 
-.dialog-box {
-    color: var(--text-color);
-    font-size: 12px;
-    line-height: 1.5;
-    margin-bottom: 10px;
-    flex-grow: 1;
+.battle-scene {
+    flex: 2;
+    background: linear-gradient(180deg, #111 0%, #003333 100%);
+    position: relative;
 }
 
-.menu {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
+/* Sprites CSS Simplificados */
+.pokemon-sprite { width: 60px; height: 60px; position: absolute; }
+.hidrojet { bottom: 20px; left: 20px; background: #3498db; border-radius: 50% 50% 10% 10%; border: 2px solid #fff; }
+.solasaur { top: 40px; right: 20px; background: #2ecc71; border-radius: 10% 50% 10% 50%; border: 2px solid #f1c40f; }
 
-.menu.hidden { display: none; }
+.hud { position: absolute; background: #fff; color: #000; padding: 5px; border-radius: 3px; font-size: 8px; width: 100px;}
+.enemy-hud { top: 10px; left: 10px; }
+.player-hud { bottom: 10px; right: 10px; }
+.hp-bar-container { width: 100%; height: 5px; background: #555; margin-top: 2px;}
+.hp-bar { height: 100%; background: #0f0; width: 100%; transition: width 0.5s; }
 
-button {
-    background-color: #fff;
-    border: 2px solid #7f8c8d;
-    padding: 10px;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 10px;
-    cursor: pointer;
-    border-radius: 5px;
-    text-transform: uppercase;
+.control-panel { height: 100px; background: #333; padding: 5px; border-top: 2px solid #fff; }
+#battle-dialog { font-size: 10px; margin-bottom: 5px; }
+.menu button { width: 48%; padding: 8px; margin: 1%; font-family: inherit; font-size: 8px; cursor: pointer; }
+
+/* --- TRANSICIÓN --- */
+#transition-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 999;
+    transition: opacity 0.5s;
 }
-button:active { background-color: #bdc3c7; }
-.back-btn { grid-column: span 2; background-color: #e74c3c; color: white; }
+.flash-anim { animation: flash 1.5s forwards; }
+
+@keyframes flash {
+    0% { opacity: 0; }
+    20% { opacity: 1; background: #fff; } /* Flash Blanco */
+    25% { opacity: 1; background: #000; }
+    30% { opacity: 0; background: #000; }
+    35% { opacity: 1; background: #000; }
+    40% { opacity: 0; background: #000; }
+    100% { opacity: 1; background: #000; } /* Se queda negro para cargar la batalla */
+}
