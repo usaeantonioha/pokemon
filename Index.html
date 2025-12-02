@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Batalla Neos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <div class="battle-scene">
+            <div class="hud enemy-hud">
+                <div class="info-box">
+                    <span class="name">Avidrón</span> <span class="level">Nv.3</span>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar" id="enemy-hp"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="sprite-container enemy-pos">
+                <div id="enemy-sprite" class="pokemon-sprite avidron">
+                    <div class="eye"></div>
+                    <div class="wing"></div>
+                </div>
+            </div>
+
+            <div class="sprite-container player-pos">
+                <div id="player-sprite" class="pokemon-sprite hidrojet">
+                    <div class="shell"></div>
+                    <div class="cannon"></div>
+                </div>
+            </div>
+
+            <div class="hud player-hud">
+                <div class="info-box">
+                    <span class="name">Hidrojet</span> <span class="level">Nv.5</span>
+                    <div class="hp-bar-container">
+                        <div class="hp-bar" id="player-hp"></div>
+                    </div>
+                    <div class="hp-text"><span id="current-hp">25</span>/25</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <div id="dialog-box" class="dialog-box">
+                ¡Un Avidrón salvaje apareció!
+            </div>
+            
+            <div id="action-menu" class="menu hidden">
+                <button onclick="showMoves()">LUCHAR</button>
+                <button onclick="addLog('¡No puedes escapar de una batalla de prueba!')">HUIR</button>
+            </div>
+
+            <div id="move-menu" class="menu hidden">
+                <button onclick="playerAttack('pistón')">Golpe Pistón</button>
+                <button onclick="playerAttack('chorro')">Chorro Presión</button>
+                <button onclick="showActions()" class="back-btn">Volver</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

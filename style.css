@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --bg-color: #f0f8ff;
+    --dialog-bg: #2c3e50;
+    --text-color: #ecf0f1;
+    --hp-green: #2ecc71;
+    --hp-yellow: #f1c40f;
+    --hp-red: #e74c3c;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Press Start 2P', cursive; /* Fuente tipo pixel art */
+    background-color: #222;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
+
+#game-container {
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    max-height: 800px;
+    background-color: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border: 2px solid #000;
+}
+
+/* --- ESCENA DE BATALLA --- */
+.battle-scene {
+    flex-grow: 1;
+    position: relative;
+    background: linear-gradient(to bottom, #87CEEB 60%, #90EE90 60%); /* Cielo y Pasto */
+}
+
+/* HUD (Barras de vida) */
+.hud {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #333;
+    width: 160px;
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.2);
+}
+.enemy-hud { top: 20px; left: 10px; }
+.player-hud { bottom: 40px; right: 10px; }
+
+.name { font-size: 10px; font-weight: bold; display: block; margin-bottom: 5px; color: #000; }
+.level { font-size: 8px; color: #555; }
+.hp-text { font-size: 8px; text-align: right; margin-top: 2px; color: #000;}
+
+.hp-bar-container {
+    width: 100%;
+    height: 10px;
+    background-color: #555;
+    border-radius: 5px;
+    border: 1px solid #000;
+    overflow: hidden;
+}
+
+.hp-bar {
+    width: 100%;
+    height: 100%;
+    background-color: var(--hp-green);
+    transition: width 0.5s ease-out, background-color 0.3s;
+}
+
+/* --- SPRITES (Pokémon dibujados con CSS) --- */
+.sprite-container {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+}
+.enemy-pos { top: 60px; right: 30px; }
+.player-pos { bottom: 20px; left: 30px; }
+
+.pokemon-sprite {
+    width: 80px;
+    height: 80px;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+/* Hidrojet (Azul y Metálico) */
+.hidrojet {
+    background: #3498db;
+    border-radius: 50% 50% 10% 10%;
+    border: 3px solid #2c3e50;
+}
+.hidrojet .shell {
+    position: absolute;
+    top: 20px; left: 10px;
+    width: 60px; height: 40px;
+    background: #95a5a6; /* Gris metal */
+    border-radius: 50%;
+    border: 2px solid #000;
+}
+.hidrojet .cannon {
+    position: absolute;
+    top: 10px; right: -5px;
+    width: 20px; height: 10px;
+    background: #2c3e50;
+}
+
+/* Avidrón (Gris y Rojo) */
+.avidron {
+    background: #bdc3c7; /* Plata */
+    border-radius: 50% 0 50% 50%;
+    border: 3px solid #7f8c8d;
+}
+.avidron .eye {
+    position: absolute;
+    top: 15px; left: 10px;
+    width: 10px; height: 10px;
+    background: red; /* Ojo robótico */
+    border-radius: 50%;
+    box-shadow: 0 0 5px red;
+}
+.avidron .wing {
+    position: absolute;
+    top: 30px; left: -10px;
+    width: 40px; height: 20px;
+    background: #7f8c8d;
+    border-radius: 50% 0 0 50%;
+}
+
+/* Animaciones */
+.shake { animation: shake 0.5s; }
+.attack-anim { transform: translateX(20px); }
+.attack-anim-enemy { transform: translateX(-20px); }
+
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+/* --- PANEL DE CONTROL --- */
+.control-panel {
+    height: 150px;
+    background-color: var(--dialog-bg);
+    border-top: 4px solid #f1c40f; /* Borde dorado */
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.dialog-box {
+    color: var(--text-color);
+    font-size: 12px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    flex-grow: 1;
+}
+
+.menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.menu.hidden { display: none; }
+
+button {
+    background-color: #fff;
+    border: 2px solid #7f8c8d;
+    padding: 10px;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+button:active { background-color: #bdc3c7; }
+.back-btn { grid-column: span 2; background-color: #e74c3c; color: white; }
