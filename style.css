@@ -1,185 +1,172 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 :root {
-    --console-color: #2c3e50;
-    --screen-border: #95a5a6;
-    --accent: #e74c3c;
-    --hp-green: #2ecc71;
-    --hp-yellow: #f1c40f;
-    --hp-red: #e74c3c;
+    /* PALETA GAMEBOY ESTRICTA */
+    --gb-1: #e0f8cf; /* Blanco Verdoso (Fondo) */
+    --gb-2: #86c06c; /* Verde Claro (Detalles) */
+    --gb-3: #306850; /* Verde Oscuro (Sombras/Hierba) */
+    --gb-4: #071821; /* Negro Verdoso (Texto/Bordes) */
 }
+
+* { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
 
 body {
     margin: 0;
-    padding: 0;
     background-color: #111;
     font-family: 'Press Start 2P', cursive;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden;
-    color: white;
+    color: var(--gb-4);
 }
 
-/* --- CONSOLA PRINCIPAL --- */
-#game-console {
-    width: 350px;
-    height: 600px;
-    background-color: var(--console-color);
+/* MARCO GAMEBOY */
+#gameboy-frame {
+    background-color: var(--gb-1);
+    padding: 20px 20px 40px 20px;
     border-radius: 10px 10px 40px 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    width: 360px;
 }
 
-/* --- PANTALLA (320x320px) --- */
+#screen-border {
+    background-color: #555;
+    padding: 15px 15px 5px 15px;
+    border-radius: 10px 10px 30px 10px;
+    margin-bottom: 20px;
+}
+
 #screen-area {
     width: 320px;
-    height: 320px;
-    background-color: #000;
-    border: 4px solid var(--screen-border);
-    border-radius: 5px 5px 20px 5px;
+    height: 288px; /* Resolución similar a GB */
+    background-color: var(--gb-1);
     position: relative;
     overflow: hidden;
-    margin-bottom: 20px;
+    border: 2px solid #444;
 }
 
 .hidden { display: none !important; }
 
-/* --- MUNDO --- */
-#world-container { width: 100%; height: 100%; position: relative; background: #2e2e2e; }
-#game-map { display: grid; grid-template-columns: repeat(10, 32px); grid-template-rows: repeat(10, 32px); }
+/* --- TÍTULO --- */
+#title-screen {
+    height: 100%; display: flex; flex-direction: column; 
+    justify-content: center; align-items: center; text-align: center;
+}
+#title-screen h1 { font-size: 30px; color: var(--gb-4); margin-bottom: 50px; text-shadow: 2px 2px var(--gb-2); }
+.blink { animation: blink 1s infinite; font-size: 12px; }
+.copyright { position: absolute; bottom: 10px; font-size: 10px; }
 
-/* Tiles */
-.tile { width: 32px; height: 32px; box-sizing: border-box; }
-.wall { background: #555; border: 1px solid #333; }
-.floor { background: #333; border: 1px solid #2a2a2a; }
-.door { background: #000; border: 2px solid #0ff; }
-.npc { display: flex; justify-content: center; align-items: center; font-size: 20px; cursor: pointer; }
-
-#player-character {
-    position: absolute; width: 32px; height: 32px;
-    display: flex; justify-content: center; align-items: center; font-size: 20px;
-    transition: top 0.2s, left 0.2s; z-index: 10;
+/* --- MUNDO Y MAPA --- */
+#map-container {
+    position: absolute;
+    /* Se mueve con JS */
+    transition: transform 0.2s linear;
 }
 
-/* Diálogos en el mapa */
+.tile {
+    width: 32px; height: 32px;
+    float: left;
+    image-rendering: pixelated;
+    display: flex; justify-content: center; align-items: center;
+}
+
+/* Tipos de Tile (Visuales con CSS puro) */
+.tile-floor { background-color: var(--gb-1); }
+.tile-wall { background-color: var(--gb-3); border: 2px solid var(--gb-4); } /* Cerca/Muro */
+.tile-bush { 
+    background-color: var(--gb-2); 
+    background-image: radial-gradient(var(--gb-3) 20%, transparent 20%);
+    background-size: 4px 4px; /* Textura de hierba */
+}
+.tile-roof { background-color: var(--gb-1); border-bottom: 4px solid var(--gb-4); } /* Techo casa */
+.tile-door { background-color: var(--gb-4); } /* Puerta negra */
+.tile-rug { background-color: var(--gb-2); border: 2px dashed var(--gb-3); } /* Alfombra salida */
+
+#player-sprite {
+    position: absolute;
+    top: 128px; left: 144px; /* Centrado en 320x288 (aprox) */
+    width: 30px; height: 30px;
+    background-color: var(--gb-4);
+    border-radius: 50% 50% 10% 10%;
+    z-index: 10;
+    /* Un pequeño detalle blanco para simular cara */
+    box-shadow: inset 5px 5px 0 var(--gb-1); 
+}
+
 #world-dialog {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    height: 60px; background: rgba(0,0,0,0.9);
-    border-top: 2px solid #fff; padding: 10px; font-size: 10px; z-index: 20;
+    position: absolute; bottom: 0; left: 0; width: 100%;
+    background: var(--gb-1);
+    border-top: 4px solid var(--gb-4);
+    padding: 10px; font-size: 10px; line-height: 1.5;
+    min-height: 60px;
 }
 
 /* --- BATALLA --- */
-#battle-container { width: 100%; height: 100%; display: flex; flex-direction: column; background: #222; }
+.battle-scene { height: 180px; position: relative; border-bottom: 2px solid var(--gb-4); }
 
-.battle-scene {
-    height: 220px; /* Espacio para los gráficos */
-    position: relative;
-    background: linear-gradient(180deg, #2c3e50 0%, #16a085 100%);
-}
-
-.battle-text-panel {
-    height: 100px; /* Espacio para texto y botones */
-    background: #000;
-    border-top: 4px solid #f1c40f;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-/* HUDs (Barras de vida) */
 .hud {
     position: absolute;
-    background: rgba(255,255,255,0.9);
-    color: #000;
-    padding: 5px;
-    border-radius: 5px;
-    width: 110px;
-    border: 2px solid #333;
+    background: var(--gb-1);
+    border: 2px solid var(--gb-4);
+    padding: 5px; border-radius: 5px;
+    font-size: 8px; width: 130px;
 }
-.name { display: block; font-size: 8px; font-weight: bold; margin-bottom: 3px; }
-.hp-bar-container { width: 100%; height: 6px; background: #555; border-radius: 3px; overflow: hidden; }
-.hp-bar { height: 100%; width: 100%; background: var(--hp-green); transition: width 0.5s; }
-.enemy-hud { top: 15px; left: 15px; }
-.player-hud { bottom: 15px; right: 15px; }
+.enemy-hud { top: 10px; left: 10px; }
+.player-hud { bottom: 15px; right: 10px; }
 
-/* Posición de Sprites */
-.sprite-pos { position: absolute; width: 80px; height: 80px; }
-.enemy-pos { top: 50px; right: 40px; }
-.player-pos { bottom: 0px; left: 40px; }
+.hp-bar-bg { width: 100%; height: 6px; background: var(--gb-4); margin: 3px 0; }
+.hp-bar { height: 100%; background: var(--gb-2); width: 100%; }
+.xp-bar-bg { width: 100%; height: 2px; background: var(--gb-4); margin-top: 2px; }
+.xp-bar { height: 100%; background: #000; width: 0%; } /* Barra XP Azul (negra en GB) */
 
-/* Dibujos CSS de los Pokémon */
-.pokemon-sprite { width: 100%; height: 100%; }
-.hidrojet { background: #3498db; border-radius: 50% 50% 10% 10%; border: 3px solid #fff; }
-.solasaur { background: #2ecc71; border-radius: 10% 50% 10% 50%; border: 3px solid #f1c40f; }
+.sprite { width: 64px; height: 64px; position: absolute; }
+.enemy-sprite { top: 40px; right: 40px; background: var(--gb-3); clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%); }
+.player-sprite { bottom: 10px; left: 30px; background: var(--gb-4); clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%); }
 
-/* Texto y Botones de Batalla */
-#battle-dialog { font-size: 10px; line-height: 1.5; margin-bottom: 10px; }
-#battle-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-button {
-    background: #fff; border: 2px solid #7f8c8d; padding: 10px;
-    font-family: inherit; font-size: 8px; cursor: pointer; border-radius: 5px;
+.battle-panel {
+    height: 108px; background: var(--gb-3);
+    padding: 10px; color: var(--gb-1);
+    display: flex; flex-direction: column; justify-content: space-between;
 }
-button:active { background: #ccc; }
-
-/* --- CONTROLES (Abajo) --- */
-#controls-area {
-    width: 100%;
-    flex-grow: 1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    box-sizing: border-box;
+#battle-text { font-size: 10px; line-height: 1.5; margin-bottom: 5px; height: 30px;}
+#battle-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+.menu-option {
+    background: var(--gb-1); color: var(--gb-4);
+    padding: 10px; font-size: 10px; cursor: pointer; text-align: center;
+    border: 2px solid var(--gb-4);
 }
+.menu-option:active { background: var(--gb-2); }
 
-.d-pad {
-    display: grid;
-    grid-template-columns: 40px 40px 40px;
-    grid-template-rows: 40px 40px 40px;
-}
-.pad-key {
-    width: 40px; height: 40px;
-    background: #222;
+/* --- CONTROLES --- */
+#controls { width: 100%; display: flex; justify-content: space-between; align-items: flex-end; }
+.d-pad { width: 90px; height: 90px; position: relative; }
+.btn { position: absolute; background: var(--gb-4); width: 30px; height: 30px; cursor: pointer; }
+.btn:active { background: var(--gb-3); }
+.up { top: 0; left: 30px; border-radius: 5px 5px 0 0; }
+.down { bottom: 0; left: 30px; border-radius: 0 0 5px 5px; }
+.left { top: 30px; left: 0; border-radius: 5px 0 0 5px; }
+.right { top: 30px; right: 0; border-radius: 0 5px 5px 0; }
+.center-pad { position: absolute; top: 30px; left: 30px; width: 30px; height: 30px; background: var(--gb-4); }
+
+.action-btns { display: flex; gap: 15px; margin-bottom: 20px; }
+.btn-round {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #a92634; /* Rojo GB */
+    color: #ffd; font-size: 12px; font-weight: bold;
     display: flex; justify-content: center; align-items: center;
-    cursor: pointer;
-    font-size: 12px; color: #555;
-    user-select: none;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.5); cursor: pointer;
 }
-.pad-key:active { background: #111; }
-/* Forma de Cruz */
-.up { grid-column: 2; grid-row: 1; border-radius: 5px 5px 0 0; background: #333;}
-.left { grid-column: 1; grid-row: 2; border-radius: 5px 0 0 5px; background: #333;}
-.center { grid-column: 2; grid-row: 2; background: #333;}
-.right { grid-column: 3; grid-row: 2; border-radius: 0 5px 5px 0; background: #333;}
-.down { grid-column: 2; grid-row: 3; border-radius: 0 0 5px 5px; background: #333;}
+.btn-round:active { transform: translateY(2px); }
+.start-select { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); }
+.pill-btn {
+    width: 60px; height: 15px; background: var(--gb-4);
+    border-radius: 10px; transform: rotate(-25deg);
+    color: var(--gb-2); font-size: 8px; text-align: center; line-height: 15px; cursor: pointer;
+}
 
-.action-btn-container { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.action-btn {
-    width: 60px; height: 60px;
-    background: var(--accent);
-    border-radius: 50%;
-    box-shadow: 2px 2px 0px #c0392b;
-    cursor: pointer;
-}
-.action-btn:active { transform: translateY(2px); box-shadow: 0 0 0; }
-.action-label { font-size: 12px; font-weight: bold; color: #7f8c8d; }
-
-/* Animaciones */
-#transition-overlay {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: #fff; opacity: 0; pointer-events: none; z-index: 100;
-    transition: opacity 0.5s;
-}
-.flash-anim { animation: flash 1s forwards; }
-@keyframes flash {
-    0%, 40%, 80% { opacity: 0; }
-    20%, 60%, 100% { opacity: 1; background: #fff; }
-}
-.shake { animation: shake 0.5s; }
-@keyframes shake {
-    0% { transform: translateX(0); } 25% { transform: translateX(5px); } 50% { transform: translateX(-5px); } 75% { transform: translateX(5px); } 100% { transform: translateX(0); }
-}
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.arrow-blink { animation: blink 1s infinite; float: right; }
