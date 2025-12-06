@@ -2,78 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Monster Blue RPG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Pokémon Neos - Cyberpunk RPG</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="gameboy-frame">
-        <div id="screen-border">
-            <div id="screen-area">
-                
-                <div id="title-screen" class="active">
-                    <h1>MONSTER<br>BLUE</h1>
-                    <p class="blink">PULSA START</p>
-                    <div class="copyright">© 2025 NEOS</div>
+    <div id="start-overlay">
+        <h1>NEOS<br>CHRONICLES</h1>
+        <p class="blink">TOCA PARA INICIAR SISTEMA</p>
+        <div class="version">v12.0 Gold Master</div>
+    </div>
+
+    <div id="game-container">
+        <canvas id="game-canvas" width="320" height="288"></canvas>
+
+        <div id="ui-layer">
+            <div id="notification-area"></div>
+            
+            <div id="dialog-box" class="hidden">
+                <div id="dialog-text"></div>
+                <div class="arrow-next">▼</div>
+            </div>
+
+            <div id="battle-ui" class="hidden">
+                <div class="battle-hud enemy">
+                    <div class="name-tag"><span id="enemy-name">???</span> Lv<span id="enemy-lvl">0</span></div>
+                    <div class="hp-track"><div id="enemy-hp-bar" class="hp-fill"></div></div>
                 </div>
-
-                <div id="world-screen" class="hidden">
-                    <div id="map-container"></div> <div id="player-sprite"></div>
-                    
-                    <div id="world-dialog" class="dialog-box hidden">
-                        <p id="world-text"></p>
-                        <div class="arrow-blink">▼</div>
-                    </div>
+                <div class="battle-hud player">
+                    <div class="name-tag"><span id="player-name">???</span> Lv<span id="player-lvl">0</span></div>
+                    <div class="hp-track"><div id="player-hp-bar" class="hp-fill"></div></div>
+                    <div class="xp-track"><div id="player-xp-bar" class="xp-fill"></div></div>
+                    <div class="hp-nums"><span id="hp-cur">0</span>/<span id="hp-max">0</span></div>
                 </div>
-
-                <div id="battle-screen" class="hidden">
-                    <div class="battle-scene">
-                        <div class="hud enemy-hud">
-                            <span id="enemy-name">Rival</span><br>
-                            :L<span id="enemy-lvl">5</span>
-                            <div class="hp-bar-bg"><div id="enemy-hp-bar" class="hp-bar"></div></div>
-                        </div>
-                        
-                        <div class="hud player-hud">
-                            <span id="player-name">MONSTER</span><br>
-                            :L<span id="player-lvl">5</span>
-                            <div class="hp-bar-bg"><div id="player-hp-bar" class="hp-bar"></div></div>
-                            <div class="hp-nums"><span id="player-hp-curr">20</span>/ <span id="player-hp-max">20</span></div>
-                            <div class="xp-bar-bg"><div id="player-xp-bar" class="xp-bar"></div></div>
-                        </div>
-
-                        <div class="sprite enemy-sprite"></div>
-                        <div class="sprite player-sprite"></div>
-                    </div>
-
-                    <div class="battle-panel">
-                        <div id="battle-text" class="typewriter">¡Un monstruo salvaje!</div>
-                        <div id="battle-menu" class="hidden">
-                            <div class="menu-option" onclick="useMove('tackle')">PLACAJE</div>
-                            <div class="menu-option" onclick="useMove('water')">CHORRO</div>
-                            <div class="menu-option" onclick="tryRun()">HUIR</div>
-                        </div>
-                    </div>
+                <div id="battle-menu">
+                    <button onclick="Game.battleInput('attack')">ATACAR</button>
+                    <button onclick="Game.battleInput('bag')">MOCHILA</button>
+                    <button onclick="Game.battleInput('catch')">CAPTURAR</button>
+                    <button onclick="Game.battleInput('run')">HUIR</button>
                 </div>
+                <div id="move-menu" class="hidden">
+                    <button id="move-btn-back" onclick="Game.battleInput('back')">VOLVER</button>
+                </div>
+            </div>
 
+            <div id="pause-menu" class="hidden">
+                <div class="menu-list">
+                    <button onclick="Game.menuAction('pokedex')">Pokédex</button>
+                    <button onclick="Game.menuAction('team')">Equipo</button>
+                    <button onclick="Game.menuAction('bag')">Mochila</button>
+                    <button onclick="Game.menuAction('save')">Guardar</button>
+                    <button onclick="Game.menuAction('export')">Exportar Save</button>
+                    <button onclick="Game.menuAction('close')">Cerrar</button>
+                </div>
             </div>
         </div>
 
-        <div id="controls">
-            <div class="d-pad">
-                <div class="btn up" onclick="inputDPad('up')"></div>
-                <div class="btn left" onclick="inputDPad('left')"></div>
-                <div class="btn right" onclick="inputDPad('right')"></div>
-                <div class="btn down" onclick="inputDPad('down')"></div>
-                <div class="center-pad"></div>
+        <div id="virtual-controls">
+            <div id="dpad" class="dpad-area">
+                <div class="dpad-btn up" data-key="ArrowUp"></div>
+                <div class="dpad-btn down" data-key="ArrowDown"></div>
+                <div class="dpad-btn left" data-key="ArrowLeft"></div>
+                <div class="dpad-btn right" data-key="ArrowRight"></div>
+                <div class="dpad-center"></div>
             </div>
-            <div class="action-btns">
-                <div class="btn-round b-btn">B</div>
-                <div class="btn-round a-btn" onclick="inputAction()">A</div>
+            <div class="action-buttons">
+                <div class="btn-circle b-btn" data-key="b">B</div>
+                <div class="btn-circle a-btn" data-key="a">A</div>
             </div>
-            <div class="start-select">
-                <div class="pill-btn" onclick="startGame()">START</div>
+            <div class="system-buttons">
+                <div class="btn-pill" data-key="start">START</div>
             </div>
         </div>
     </div>
