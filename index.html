@@ -3,67 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Neos</title>
+    <title>Monster Blue RPG</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="game-console">
-        <div id="screen-area">
-            
-            <div id="transition-overlay"></div>
-
-            <div id="world-container">
-                <div id="game-map">
-                    <div id="player-character">🤖</div>
+    <div id="gameboy-frame">
+        <div id="screen-border">
+            <div id="screen-area">
+                
+                <div id="title-screen" class="active">
+                    <h1>MONSTER<br>BLUE</h1>
+                    <p class="blink">PULSA START</p>
+                    <div class="copyright">© 2025 NEOS</div>
                 </div>
-                <div id="world-dialog" class="dialog-box hidden">
-                    <p id="world-dialog-text">...</p>
-                </div>
-            </div>
 
-            <div id="battle-container" class="hidden">
-                <div class="battle-scene">
-                    <div class="hud enemy-hud">
-                        <span class="name">Rival Solasaur</span> <span class="level">Nv.5</span>
-                        <div class="hp-bar-container"><div class="hp-bar" id="enemy-hp"></div></div>
-                    </div>
+                <div id="world-screen" class="hidden">
+                    <div id="map-container"></div> <div id="player-sprite"></div>
                     
-                    <div class="sprite-pos enemy-pos">
-                        <div id="enemy-sprite" class="pokemon-sprite solasaur"></div>
-                    </div>
-                    <div class="sprite-pos player-pos">
-                        <div id="player-sprite" class="pokemon-sprite hidrojet"></div>
-                    </div>
-
-                    <div class="hud player-hud">
-                        <span class="name">Hidrojet</span> <span class="level">Nv.5</span>
-                        <div class="hp-bar-container"><div class="hp-bar" id="player-hp"></div></div>
-                        <div class="hp-text"><span id="current-hp">25</span>/25</div>
+                    <div id="world-dialog" class="dialog-box hidden">
+                        <p id="world-text"></p>
+                        <div class="arrow-blink">▼</div>
                     </div>
                 </div>
 
-                <div class="battle-text-panel">
-                    <div id="battle-dialog">¡Comienza la batalla!</div>
-                    <div id="battle-actions" class="hidden">
-                        <button onclick="playerAttack('pistón')">GOLPE PISTÓN</button>
-                        <button onclick="playerAttack('chorro')">CHORRO PRESIÓN</button>
+                <div id="battle-screen" class="hidden">
+                    <div class="battle-scene">
+                        <div class="hud enemy-hud">
+                            <span id="enemy-name">Rival</span><br>
+                            :L<span id="enemy-lvl">5</span>
+                            <div class="hp-bar-bg"><div id="enemy-hp-bar" class="hp-bar"></div></div>
+                        </div>
+                        
+                        <div class="hud player-hud">
+                            <span id="player-name">MONSTER</span><br>
+                            :L<span id="player-lvl">5</span>
+                            <div class="hp-bar-bg"><div id="player-hp-bar" class="hp-bar"></div></div>
+                            <div class="hp-nums"><span id="player-hp-curr">20</span>/ <span id="player-hp-max">20</span></div>
+                            <div class="xp-bar-bg"><div id="player-xp-bar" class="xp-bar"></div></div>
+                        </div>
+
+                        <div class="sprite enemy-sprite"></div>
+                        <div class="sprite player-sprite"></div>
+                    </div>
+
+                    <div class="battle-panel">
+                        <div id="battle-text" class="typewriter">¡Un monstruo salvaje!</div>
+                        <div id="battle-menu" class="hidden">
+                            <div class="menu-option" onclick="useMove('tackle')">PLACAJE</div>
+                            <div class="menu-option" onclick="useMove('water')">CHORRO</div>
+                            <div class="menu-option" onclick="tryRun()">HUIR</div>
+                        </div>
                     </div>
                 </div>
+
             </div>
         </div>
 
-        <div id="controls-area">
+        <div id="controls">
             <div class="d-pad">
-                <div class="pad-key up" onclick="movePlayer(0, -1)">▲</div>
-                <div class="pad-key left" onclick="movePlayer(-1, 0)">◀</div>
-                <div class="pad-key center"></div>
-                <div class="pad-key right" onclick="movePlayer(1, 0)">▶</div>
-                <div class="pad-key down" onclick="movePlayer(0, 1)">▼</div>
+                <div class="btn up" onclick="inputDPad('up')"></div>
+                <div class="btn left" onclick="inputDPad('left')"></div>
+                <div class="btn right" onclick="inputDPad('right')"></div>
+                <div class="btn down" onclick="inputDPad('down')"></div>
+                <div class="center-pad"></div>
             </div>
-            <div class="action-btn-container">
-                <div class="action-label">A</div>
-                <div class="action-btn" onclick="interact()"></div>
+            <div class="action-btns">
+                <div class="btn-round b-btn">B</div>
+                <div class="btn-round a-btn" onclick="inputAction()">A</div>
+            </div>
+            <div class="start-select">
+                <div class="pill-btn" onclick="startGame()">START</div>
             </div>
         </div>
     </div>
