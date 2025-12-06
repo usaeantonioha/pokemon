@@ -1,185 +1,369 @@
-// --- CONFIGURACIÓN DEL MAPA ---
-const tileSize = 32;
-const mapLayout = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 2, 1, 0, 1, 3, 1, 1],
-    [1, 0, 1, 1, 1, 0, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 6, 1], 
-    [1, 5, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 0, 1, 1, 1, 1, 0, 0, 1],
-    [1, 0, 0, 1, 4, 1, 1, 0, 0, 1], // Jefe (4)
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-];
+/* --- CONFIGURACIÓN Y ESTADO --- */
+const TILE_SIZE = 32;
+const VIEWPORT_W = 320;
+const VIEWPORT_H = 288;
 
-// Estado
-let playerX = 1, playerY = 8;
-let inBattle = false, canMove = true;
+// IDs de Tiles
+const T_FLOOR = 0;
+const T_WALL = 1;
+const T_GRASS = 2; // Encuentros aquí
+const T_DOOR = 3;  // Teletransporte
+const T_ROOF = 4;  // Estético
+const T_EXIT = 5;  // Salida de casa
 
-// Referencias
-const gameMap = document.getElementById('game-map');
-const playerSprite = document.getElementById('player-character');
-const worldContainer = document.getElementById('world-container');
-const battleContainer = document.getElementById('battle-container');
-const worldDialog = document.getElementById('world-dialog');
-const worldDialogText = document.getElementById('world-dialog-text');
-const transitionOverlay = document.getElementById('transition-overlay');
+// Estado del Jugador
+let player = {
+    map: 'pueblo',
+    x: 5, y: 5, // Coordenadas en tiles
+    level: 1,
+    currentExp: 0,
+    maxExp: 50,
+    maxHp: 20,
+    currentHp: 20,
+    // Estadísticas de combate base
+    attack: 5,
+    defense: 3
+};
 
-// --- INICIALIZAR MAPA ---
-function drawMap() {
-    gameMap.innerHTML = '';
-    gameMap.appendChild(playerSprite);
-    
-    for (let y = 0; y < 10; y++) {
-        for (let x = 0; x < 10; x++) {
-            const type = mapLayout[y][x];
-            const tile = document.createElement('div');
-            tile.classList.add('tile');
-            tile.style.gridColumnStart = x + 1;
-            tile.style.gridRowStart = y + 1;
+let gameActive = false;
+let inBattle = false;
+let isMoving = false;
 
-            if (type === 1) tile.classList.add('wall');
-            else if (type === 2 || type === 3) tile.classList.add('door');
-            else tile.classList.add('floor');
-
-            if (type === 4) { tile.innerText = '🦹'; tile.classList.add('npc'); }
-            if (type === 5) { tile.innerText = '👴'; tile.classList.add('npc'); }
-            if (type === 6) { tile.innerText = '👩'; tile.classList.add('npc'); }
-
-            gameMap.appendChild(tile);
+// --- DATOS DE MAPAS ---
+// Pueblo Paleta (Inspiración)
+const MAPS = {
+    'pueblo': {
+        width: 10,
+        data: [
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 2, 2, 2, 1, 4, 4, 4, 1, 1, // Hierba a la izq, Casa a la der
+            1, 2, 2, 2, 1, 1, 3, 1, 1, 1, // Puerta en (6, 2)
+            1, 2, 2, 2, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+            1, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+            1, 2, 2, 0, 0, 0, 2, 2, 2, 1,
+            1, 2, 2, 0, 0, 0, 2, 2, 2, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1
+        ],
+        portals: {
+            "6,2": { targetMap: 'casa', x: 2, y: 4 } // Puerta casa
+        }
+    },
+    'casa': {
+        width: 5,
+        data: [
+            1, 1, 1, 1, 1,
+            1, 0, 0, 0, 1,
+            1, 0, 0, 0, 1,
+            1, 0, 0, 0, 1,
+            1, 1, 5, 1, 1  // Salida en (2, 4)
+        ],
+        portals: {
+            "2,4": { targetMap: 'pueblo', x: 6, y: 3 } // Salir al pueblo
         }
     }
-    updatePlayerPos();
-}
+};
 
-function updatePlayerPos() {
-    playerSprite.style.left = (playerX * tileSize) + 'px';
-    playerSprite.style.top = (playerY * tileSize) + 'px';
-}
+// --- MOTOR DEL JUEGO ---
 
-function movePlayer(dx, dy) {
-    if (inBattle || !canMove) return;
-    const nx = playerX + dx, ny = playerY + dy;
-    const target = mapLayout[ny][nx];
+// Inicializar (Pantalla Título)
+function startGame() {
+    if (gameActive) return;
+    loadGame(); // Intentar cargar partida
     
-    if (target === 1 || target === 4 || target === 5 || target === 6) return; // Colisión
+    document.getElementById('title-screen').classList.add('hidden');
+    document.getElementById('world-screen').classList.remove('hidden');
+    gameActive = true;
     
-    playerX = nx; playerY = ny;
-    updatePlayerPos();
+    renderMap();
+    updateCamera();
+    updateHUD(); // Para preparar batalla futura
 }
 
-// --- INTERACCIÓN ---
-function interact() {
-    if (inBattle) return; // El botón A no hace nada aquí, se usan los botones de ataque
-    if (!canMove) { closeDialog(); return; }
+// Renderizado del Mapa
+function renderMap() {
+    const container = document.getElementById('map-container');
+    container.innerHTML = '';
+    
+    const currentMapData = MAPS[player.map];
+    container.style.width = (currentMapData.width * TILE_SIZE) + 'px';
+    
+    currentMapData.data.forEach(tileId => {
+        const div = document.createElement('div');
+        div.className = 'tile';
+        if (tileId === T_WALL) div.classList.add('tile-wall');
+        if (tileId === T_GRASS) div.classList.add('tile-bush');
+        if (tileId === T_DOOR) div.classList.add('tile-door');
+        if (tileId === T_ROOF) div.classList.add('tile-roof');
+        if (tileId === T_EXIT) div.classList.add('tile-rug');
+        if (tileId === T_FLOOR) div.classList.add('tile-floor');
+        container.appendChild(div);
+    });
+}
 
-    const neighbors = [{x:0, y:-1}, {x:0, y:1}, {x:-1, y:0}, {x:1, y:0}];
-    let found = false;
+// Cámara (Centrar jugador)
+function updateCamera() {
+    const mapEl = document.getElementById('map-container');
+    // Calculamos el offset para centrar al jugador
+    // El jugador siempre está en el centro de la pantalla (160, 144)
+    // Map position = CenterScreen - (PlayerX * 32)
+    const centerX = VIEWPORT_W / 2 - (TILE_SIZE / 2);
+    const centerY = VIEWPORT_H / 2 - (TILE_SIZE / 2);
+    
+    const x = centerX - (player.x * TILE_SIZE);
+    const y = centerY - (player.y * TILE_SIZE);
+    
+    mapEl.style.transform = `translate(${x}px, ${y}px)`;
+}
 
-    for (let offset of neighbors) {
-        const tx = playerX + offset.x, ty = playerY + offset.y;
-        const tile = mapLayout[ty][tx];
-        
-        if (tile === 4) { // JEFE
-            showDialog("Rival: ¡Mi Solasaur está listo! ¡Pelea!");
-            setTimeout(startBattle, 1500);
-            found = true; break;
-        } else if (tile === 5) { showDialog("Vecino: Usa los botones de abajo para moverte."); found = true; break; }
-        else if (tile === 6) { showDialog("Mamá: ¡Suerte en tu aventura!"); playerHp=25; updateBattleHUD(); found = true; break; }
+// Movimiento
+function inputDPad(dir) {
+    if (!gameActive || isMoving || inBattle) return;
+    
+    let dx = 0, dy = 0;
+    if (dir === 'up') dy = -1;
+    if (dir === 'down') dy = 1;
+    if (dir === 'left') dx = -1;
+    if (dir === 'right') dx = 1;
+    
+    attemptMove(dx, dy);
+}
+
+function inputAction() {
+    if (!gameActive) {
+        // En título, A funciona como Start
+        startGame();
+        return;
+    }
+    // Interacciones futuras (hablar)
+}
+
+function attemptMove(dx, dy) {
+    const mapInfo = MAPS[player.map];
+    const newX = player.x + dx;
+    const newY = player.y + dy;
+    
+    // Verificar límites
+    const index = newY * mapInfo.width + newX;
+    if (newX < 0 || newX >= mapInfo.width || index < 0 || index >= mapInfo.data.length) return;
+    
+    const tileType = mapInfo.data[index];
+    
+    // Colisiones (Muros y Techos bloquean)
+    if (tileType === T_WALL || tileType === T_ROOF) {
+        // Sonido de choque?
+        return;
     }
     
-    if (!found) showDialog("...");
+    // Mover
+    player.x = newX;
+    player.y = newY;
+    isMoving = true;
+    updateCamera();
+    
+    setTimeout(() => { 
+        isMoving = false; 
+        checkEvents(newX, newY, tileType);
+        saveGame(); // Guardar tras mover
+    }, 200);
 }
 
-function showDialog(text) {
-    worldDialogText.innerText = text;
-    worldDialog.classList.remove('hidden');
-    canMove = false;
-}
-function closeDialog() {
-    worldDialog.classList.add('hidden');
-    canMove = true;
+function checkEvents(x, y, tileType) {
+    const mapInfo = MAPS[player.map];
+    const key = `${x},${y}`;
+    
+    // 1. Teletransporte (Puertas/Salidas)
+    if (mapInfo.portals && mapInfo.portals[key]) {
+        const portal = mapInfo.portals[key];
+        player.map = portal.targetMap;
+        player.x = portal.x;
+        player.y = portal.y;
+        renderMap();
+        updateCamera();
+        return;
+    }
+    
+    // 2. Encuentros Aleatorios (Hierba)
+    if (tileType === T_GRASS) {
+        if (Math.random() < 0.15) { // 15% de probabilidad
+            startBattle();
+        }
+    }
 }
 
-// --- BATALLA ---
-let playerHp = 25, enemyHp = 20;
-const pBar = document.getElementById('player-hp'), eBar = document.getElementById('enemy-hp');
-const bDialog = document.getElementById('battle-dialog'), bActions = document.getElementById('battle-actions');
+// --- SISTEMA DE BATALLA ---
+let enemy = {};
 
 function startBattle() {
-    closeDialog();
-    transitionOverlay.classList.add('flash-anim');
-    setTimeout(() => {
-        worldContainer.classList.add('hidden');
-        battleContainer.classList.remove('hidden');
-        inBattle = true;
-        bActions.classList.remove('hidden');
-        bDialog.innerText = "¡Rival Solasaur ataca!";
-        transitionOverlay.classList.remove('flash-anim');
-    }, 1000);
+    inBattle = true;
+    document.getElementById('world-screen').classList.add('hidden');
+    document.getElementById('battle-screen').classList.remove('hidden');
+    
+    // Generar enemigo basado en el nivel del jugador
+    const lvl = Math.max(1, player.level + Math.floor(Math.random() * 3) - 1);
+    enemy = {
+        name: "WILD BUG",
+        level: lvl,
+        maxHp: 15 + (lvl * 5),
+        currentHp: 15 + (lvl * 5),
+        xpReward: 10 + (lvl * 5)
+    };
+    
+    updateBattleUI();
+    writeBattleText(`¡Apareció un ${enemy.name}!`);
+    document.getElementById('battle-menu').classList.remove('hidden');
 }
 
-function playerAttack(move) {
-    bActions.classList.add('hidden');
-    let dmg = (move === 'pistón') ? 5 : 7;
-    bDialog.innerText = "¡Usaste " + (move === 'pistón' ? "Golpe Pistón" : "Chorro") + "!";
+function useMove(move) {
+    document.getElementById('battle-menu').classList.add('hidden');
     
-    // Animación ataque
-    document.getElementById('player-sprite').classList.add('attack-anim');
-    setTimeout(() => document.getElementById('player-sprite').classList.remove('attack-anim'), 300);
-
+    // Turno Jugador
+    let dmg = 0;
+    if (move === 'tackle') dmg = Math.floor(player.attack * 1.5);
+    if (move === 'water') dmg = Math.floor(player.attack * 2); // Más fuerte
+    
+    writeBattleText(`¡Usaste ${move.toUpperCase()}!`);
+    
     setTimeout(() => {
-        enemyHp -= dmg;
-        if (enemyHp < 0) enemyHp = 0;
-        updateBattleHUD();
-        document.getElementById('enemy-sprite').classList.add('shake');
-        setTimeout(() => document.getElementById('enemy-sprite').classList.remove('shake'), 500);
-
-        if (enemyHp <= 0) setTimeout(() => endBattle(true), 1000);
-        else setTimeout(enemyTurn, 1500);
+        enemy.currentHp -= dmg;
+        if (enemy.currentHp < 0) enemy.currentHp = 0;
+        updateBattleUI();
+        
+        if (enemy.currentHp <= 0) {
+            winBattle();
+        } else {
+            setTimeout(enemyTurn, 1000);
+        }
     }, 1000);
 }
 
 function enemyTurn() {
-    bDialog.innerText = "¡Solasaur usó Hoja Afilada!";
+    writeBattleText(`¡${enemy.name} ataca!`);
+    const dmg = Math.max(1, Math.floor(enemy.level * 1.5) - Math.floor(player.defense / 2));
+    
     setTimeout(() => {
-        playerHp -= 4;
-        if (playerHp < 0) playerHp = 0;
-        updateBattleHUD();
-        document.getElementById('player-sprite').classList.add('shake');
-        setTimeout(() => document.getElementById('player-sprite').classList.remove('shake'), 500);
-
-        if (playerHp <= 0) setTimeout(() => endBattle(false), 1000);
-        else {
-            bDialog.innerText = "¿Qué harás?";
-            bActions.classList.remove('hidden');
+        player.currentHp -= dmg;
+        if (player.currentHp < 0) player.currentHp = 0;
+        updateBattleUI();
+        
+        if (player.currentHp <= 0) {
+            writeBattleText("¡Te has debilitado...");
+            setTimeout(() => {
+                // Respawn en casa (reset simple)
+                player.currentHp = player.maxHp;
+                player.map = 'casa'; player.x = 2; player.y = 2;
+                endBattle();
+            }, 2000);
+        } else {
+            document.getElementById('battle-menu').classList.remove('hidden');
+            writeBattleText("¿Qué harás?");
         }
     }, 1000);
 }
 
-function updateBattleHUD() {
-    pBar.style.width = (playerHp / 25 * 100) + "%";
-    eBar.style.width = (enemyHp / 20 * 100) + "%";
-    document.getElementById('current-hp').innerText = playerHp;
-}
-
-function endBattle(win) {
-    if (win) {
-        bDialog.innerText = "¡Ganaste!";
-        mapLayout[7][4] = 0; // Quitar jefe
+function tryRun() {
+    if (Math.random() > 0.5) {
+        writeBattleText("¡Escapaste sin problemas!");
+        setTimeout(endBattle, 1000);
     } else {
-        bDialog.innerText = "Perdiste...";
-        playerX = 1; playerY = 8; // Reset pos
-        playerHp = 25; enemyHp = 20; updateBattleHUD(); // Reset vida
+        writeBattleText("¡No pudiste escapar!");
+        document.getElementById('battle-menu').classList.add('hidden');
+        setTimeout(enemyTurn, 1000);
     }
-    
-    setTimeout(() => {
-        battleContainer.classList.add('hidden');
-        worldContainer.classList.remove('hidden');
-        inBattle = false;
-        drawMap();
-    }, 2000);
 }
 
-drawMap();
+// --- SISTEMA DE EXPERIENCIA (Instrucción 3) ---
+function winBattle() {
+    writeBattleText("¡Ganaste la batalla!");
+    setTimeout(() => {
+        gainExp(enemy.xpReward);
+    }, 1000);
+}
+
+function gainExp(amount) {
+    player.currentExp += amount;
+    writeBattleText(`¡Ganaste ${amount} XP!`);
+    updateBattleUI();
+    
+    if (player.currentExp >= player.maxExp) {
+        setTimeout(levelUp, 1000);
+    } else {
+        setTimeout(endBattle, 1500);
+    }
+}
+
+function levelUp() {
+    player.level++;
+    player.currentExp -= player.maxExp;
+    player.maxExp = Math.floor(player.maxExp * 1.5);
+    
+    // Subir stats 10%
+    player.maxHp = Math.floor(player.maxHp * 1.1);
+    player.attack = Math.floor(player.attack * 1.1);
+    player.defense = Math.floor(player.defense * 1.1);
+    player.currentHp = player.maxHp; // Curar al subir nivel
+    
+    updateBattleUI();
+    writeBattleText(`¡Subiste al nivel ${player.level}!`);
+    setTimeout(endBattle, 2000);
+}
+
+function endBattle() {
+    inBattle = false;
+    document.getElementById('battle-screen').classList.add('hidden');
+    document.getElementById('world-screen').classList.remove('hidden');
+    renderMap();
+    updateCamera();
+    saveGame();
+}
+
+// --- UI HELPERS ---
+function updateBattleUI() {
+    // Enemigo
+    document.getElementById('enemy-name').innerText = enemy.name;
+    document.getElementById('enemy-lvl').innerText = enemy.level;
+    const enemyPct = (enemy.currentHp / enemy.maxHp) * 100;
+    document.getElementById('enemy-hp-bar').style.width = enemyPct + '%';
+    
+    // Jugador
+    document.getElementById('player-lvl').innerText = player.level;
+    document.getElementById('player-hp-curr').innerText = player.currentHp;
+    document.getElementById('player-hp-max').innerText = player.maxHp;
+    const playerPct = (player.currentHp / player.maxHp) * 100;
+    document.getElementById('player-hp-bar').style.width = playerPct + '%';
+    
+    const xpPct = (player.currentExp / player.maxExp) * 100;
+    document.getElementById('player-xp-bar').style.width = xpPct + '%';
+}
+
+function writeBattleText(text) {
+    document.getElementById('battle-text').innerText = text;
+}
+
+function updateHUD() {
+    // Actualizar HUD sin estar en batalla (para transición suave)
+    updateBattleUI(); 
+}
+
+// --- PERSISTENCIA (Instrucción 5) ---
+function saveGame() {
+    localStorage.setItem('monsterBlueSave', JSON.stringify(player));
+}
+
+function loadGame() {
+    const saved = localStorage.getItem('monsterBlueSave');
+    if (saved) {
+        player = JSON.parse(saved);
+    }
+}
+
+// Control por teclado para PC
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') startGame(); // Instrucción 5
+    if (e.key === 'ArrowUp') inputDPad('up');
+    if (e.key === 'ArrowDown') inputDPad('down');
+    if (e.key === 'ArrowLeft') inputDPad('left');
+    if (e.key === 'ArrowRight') inputDPad('right');
+    if (e.key === 'z') inputAction(); // A
+});
