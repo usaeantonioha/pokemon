@@ -1,146 +1,176 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 :root {
-    --gb-dark: #0f380f;
-    --gb-light: #9bbc0f;
-    --gb-white: #e0f8d0;
-    --gb-black: #081820;
-    --cyber-neon: #00ffcc;
-    --ui-bg: rgba(8, 24, 32, 0.95);
+    --neon-cyan: #00fff2;
+    --neon-pink: #ff00ff;
+    --dark-bg: #0a0a12;
+    --metal-dark: #1a1a24;
+    --ui-border: 2px solid var(--neon-cyan);
 }
 
-/* --- RESET Y BASE --- */
+/* --- BASE --- */
 * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
 body {
     margin: 0; padding: 0;
     background: #000;
-    font-family: 'VT323', monospace;
+    font-family: 'VT323', monospace; letter-spacing: 1px;
     height: 100vh; width: 100vw;
     overflow: hidden;
     display: flex; justify-content: center; align-items: center;
 }
 
-/* --- CONTENEDOR PRINCIPAL (Escalado) --- */
-#game-container {
-    position: relative;
-    width: 320px; height: 568px; /* Ratio móvil retro */
-    background: #222;
-    display: flex; flex-direction: column;
-    box-shadow: 0 0 20px rgba(0,255,204,0.2);
+/* --- EFECTOS DE PANTALLA CRT --- */
+#scanline-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 3px,
+        rgba(0, 0, 0, 0.2) 4px
+    );
+    pointer-events: none; z-index: 99999; opacity: 0.5;
 }
 
+/* --- CONTENEDOR PRINCIPAL --- */
+#game-container {
+    position: relative;
+    width: 320px; height: 568px;
+    background: var(--dark-bg);
+    display: flex; flex-direction: column;
+    box-shadow: 0 0 30px rgba(0, 255, 242, 0.2);
+    border: 1px solid #222;
+}
+
+/* --- ESTILOS CYBERPUNK GENÉRICOS --- */
+.cyber-box {
+    background: rgba(10, 10, 18, 0.95);
+    border: var(--ui-border);
+    box-shadow: inset 0 0 10px rgba(0,255,242,0.2), 0 0 5px var(--neon-cyan);
+    color: var(--neon-cyan);
+    text-shadow: 0 0 2px var(--neon-cyan);
+}
+.cyber-btn {
+    box-shadow: 0 0 5px var(--neon-cyan) !important;
+    border-color: var(--neon-cyan) !important;
+    color: var(--neon-cyan) !important;
+    text-shadow: 0 0 2px var(--neon-cyan);
+}
+.cyber-btn:active, .cyber-btn.active {
+    background: var(--neon-cyan) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--neon-cyan) !important;
+}
+
+/* --- PANTALLA DE INICIO --- */
 #start-overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: #000; z-index: 9999;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    color: var(--cyber-neon); text-align: center;
+    background-image: radial-gradient(circle at center, #111 0%, #000 100%);
 }
-#start-overlay h1 { font-size: 3rem; margin-bottom: 20px; text-shadow: 0 0 10px var(--cyber-neon); }
-.blink { animation: blink 1s infinite; }
-.version { position: absolute; bottom: 10px; font-size: 0.8rem; color: #555; }
+.title-box { padding: 20px 40px; text-align: center; margin-bottom: 40px; transform: skewX(-5deg); }
+#start-overlay h1 { font-size: 3rem; margin: 0; line-height: 0.9; color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink); }
+.subtitle { margin-top: 10px; color: var(--neon-cyan); font-size: 0.9rem; }
+.prompt { color: #fff; font-size: 1.2rem; }
 
-/* --- CANVAS (Juego) --- */
+/* --- CANVAS --- */
 #game-canvas {
     width: 320px; height: 288px;
-    background: var(--gb-black);
+    background: #000;
     image-rendering: pixelated;
-    border-bottom: 2px solid var(--cyber-neon);
+    border-bottom: var(--ui-border);
 }
 
-/* --- UI SUPERPUESTA --- */
+/* --- UI --- */
 #ui-layer { position: absolute; top: 0; left: 0; width: 320px; height: 288px; pointer-events: none; }
-
-#notification-area {
-    position: absolute; top: 10px; left: 0; width: 100%;
-    text-align: center; pointer-events: none;
-}
-.toast {
-    display: inline-block; background: var(--ui-bg); color: #fff;
-    padding: 5px 10px; border-radius: 15px; border: 1px solid var(--cyber-neon);
-    font-size: 1rem; animation: slideDown 0.3s ease-out;
-}
 
 #dialog-box {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 80px;
-    background: var(--ui-bg); border-top: 2px solid #fff;
-    padding: 10px; color: #fff; font-size: 1.2rem; line-height: 1.2;
-    pointer-events: auto;
+    padding: 10px; font-size: 1.3rem; line-height: 1.2;
+    pointer-events: auto; color: #fff;
 }
-.arrow-next { position: absolute; bottom: 5px; right: 10px; animation: bounce 0.5s infinite; }
 
 /* --- HUD BATALLA --- */
 #battle-ui { width: 100%; height: 100%; position: relative; pointer-events: auto; }
-.battle-hud { position: absolute; background: rgba(255,255,255,0.9); padding: 5px; border: 2px solid #000; border-radius: 5px; width: 140px; color: #000; }
+.battle-hud { position: absolute; padding: 5px; width: 140px; border-radius: 0; transform: skewX(-10deg); }
 .battle-hud.enemy { top: 10px; left: 10px; }
 .battle-hud.player { bottom: 90px; right: 10px; }
+.name-tag { font-size: 1rem; margin-bottom: 2px; }
 
-.hp-track { width: 100%; height: 8px; background: #555; border: 1px solid #000; margin-top: 2px; }
-.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; }
-.xp-track { width: 100%; height: 4px; background: #333; margin-top: 2px; }
-.xp-fill { height: 100%; width: 0%; background: #3498db; }
+.hp-track { width: 100%; height: 8px; background: #333; border: 1px solid var(--neon-cyan); }
+.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; box-shadow: inset 0 0 2px #fff; }
+.xp-track { width: 100%; height: 3px; background: #222; margin-top: 2px; }
+.xp-fill { height: 100%; width: 0%; background: var(--neon-cyan); box-shadow: 0 0 5px var(--neon-cyan); }
+.hp-nums { font-size: 0.8rem; text-align: right; margin-top: 2px; color: #fff; }
 
 #battle-menu, #move-menu {
     position: absolute; bottom: 0; left: 0; width: 100%; height: 88px;
-    background: var(--ui-bg); border-top: 2px solid var(--cyber-neon);
     display: grid; grid-template-columns: 1fr 1fr;
+    background: rgba(0,0,0,0.9);
 }
+.no-border { border: none; border-top: var(--ui-border); }
 button {
-    background: transparent; border: 1px solid #333; color: #fff;
-    font-family: inherit; font-size: 1.2rem; cursor: pointer;
+    background: transparent; border: 1px solid #333; color: var(--neon-cyan);
+    font-family: inherit; font-size: 1.3rem; cursor: pointer;
+    text-shadow: 0 0 2px var(--neon-cyan); transition: all 0.1s;
 }
-button:active { background: var(--cyber-neon); color: #000; }
+button:active { background: var(--neon-cyan); color: #000; }
 
 /* --- MENÚ PAUSA --- */
 #pause-menu {
-    position: absolute; top: 0; right: 0; width: 120px; height: auto;
-    background: var(--ui-bg); border: 2px solid #fff;
+    position: absolute; top: 10px; right: 10px; width: 130px; height: auto;
     pointer-events: auto;
 }
-.menu-list button { display: block; width: 100%; text-align: left; padding: 5px; border: none; border-bottom: 1px solid #333; }
+.menu-header { background: var(--neon-cyan); color: #000; padding: 2px 5px; font-size: 0.9rem; text-align: center; }
+.menu-list button { display: block; width: 100%; text-align: left; padding: 8px 5px; border: none; border-bottom: 1px solid #333; font-size: 1.1rem;}
 
-/* --- CONTROLES VIRTUALES --- */
+/* --- CONTROLES --- */
 #virtual-controls {
     flex-grow: 1; background: #111;
     position: relative; display: flex; flex-direction: column; justify-content: flex-end; padding-bottom: 20px;
+    border-top: var(--ui-border);
+    background-image: linear-gradient(rgba(0,255,242,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,242,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
 }
 
 .dpad-area {
-    position: absolute; bottom: 60px; left: 20px;
-    width: 120px; height: 120px;
+    position: absolute; bottom: 50px; left: 20px; width: 140px; height: 140px;
 }
 .dpad-btn {
-    position: absolute; width: 40px; height: 40px; background: #333;
-    border: 1px solid #444;
+    position: absolute; width: 46px; height: 46px; background: #222;
+    border: 2px solid #444; box-shadow: inset 0 0 5px #000;
 }
-.dpad-btn:active, .dpad-btn.pressed { background: #555; }
-.up { top: 0; left: 40px; border-radius: 5px 5px 0 0; }
-.down { bottom: 0; left: 40px; border-radius: 0 0 5px 5px; }
-.left { top: 40px; left: 0; border-radius: 5px 0 0 5px; }
-.right { top: 40px; right: 80px; left: 80px; border-radius: 0 5px 5px 0; }
-.dpad-center { position: absolute; top: 40px; left: 40px; width: 40px; height: 40px; background: #222; }
+.dpad-btn.active { background: var(--neon-cyan); box-shadow: 0 0 15px var(--neon-cyan); border-color: #fff; }
+.up { top: 0; left: 47px; border-radius: 5px 5px 0 0; }
+.down { bottom: 0; left: 47px; border-radius: 0 0 5px 5px; }
+.left { top: 47px; left: 0; border-radius: 5px 0 0 5px; }
+.right { top: 47px; right: 0; border-radius: 0 5px 5px 0; }
+.dpad-center { position: absolute; top: 47px; left: 47px; width: 46px; height: 46px; background: #1a1a1a; }
 
 .action-buttons {
-    position: absolute; bottom: 80px; right: 20px;
-    display: flex; gap: 20px; align-items: flex-end;
+    position: absolute; bottom: 70px; right: 20px;
+    display: flex; gap: 15px; align-items: flex-end;
 }
 .btn-circle {
-    width: 60px; height: 60px; border-radius: 50%;
-    background: #e74c3c; border: 2px solid #c0392b;
-    color: #fff; display: flex; justify-content: center; align-items: center;
-    font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 0 #992d22;
+    width: 65px; height: 65px; border-radius: 50%;
+    background: #222; border: 2px solid var(--neon-pink); color: var(--neon-pink);
+    display: flex; justify-content: center; align-items: center;
+    font-size: 1.8rem; font-weight: bold; text-shadow: 0 0 5px var(--neon-pink);
+    box-shadow: 0 0 5px var(--neon-pink);
 }
-.btn-circle:active, .btn-circle.pressed { transform: translateY(4px); box-shadow: 0 0 0; }
-.b-btn { margin-bottom: -15px; background: #f1c40f; border-color: #f39c12; color: #000; box-shadow: 0 4px 0 #d35400; }
+.b-btn { margin-bottom: -20px; border-color: #f1c40f; color: #f1c40f; text-shadow: 0 0 5px #f1c40f; box-shadow: 0 0 5px #f1c40f;}
 
 .system-buttons { text-align: center; margin-bottom: 10px; }
 .btn-pill {
-    display: inline-block; padding: 5px 20px; background: #555;
-    border-radius: 10px; color: #fff; transform: rotate(-15deg);
-    border: 1px solid #777; font-size: 0.8rem;
+    display: inline-block; padding: 8px 25px; background: #222;
+    border-radius: 20px; color: #fff; border: 1px solid #555;
+    font-size: 0.9rem; letter-spacing: 2px;
 }
 
-/* CLASES UTILITARIAS */
+/* UTILIDADES */
 .hidden { display: none !important; }
+.blink { animation: blink 1s infinite step-end; }
 @keyframes blink { 50% { opacity: 0; } }
+.toast { display: inline-block; background: var(--dark-bg); color: var(--neon-cyan); padding: 5px 15px; border: 1px solid var(--neon-cyan); border-radius: 4px; font-size: 1rem; animation: slideDown 0.3s ease-out; box-shadow: 0 0 10px rgba(0,255,242,0.3); margin-top: 20px;}
 @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-@keyframes bounce { 50% { transform: translateY(3px); } }
