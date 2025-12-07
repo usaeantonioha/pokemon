@@ -1,4 +1,6 @@
-/* === MOTOR NEOS v17 - TEXTURAS & INPUT FIX === */
+/* =========================================
+   NEOS ENGINE v17.1 - SAFE BOOT MODE
+   ========================================= */
 
 // --- CONFIGURACIÓN ---
 const CFG = { W: 320, H: 288, TILE: 32 };
@@ -18,12 +20,13 @@ const DB = {
     ]
 };
 
-// --- ESTADO GLOBAL ---
+// --- ESTADO ---
 const State = {
     started: false, mode: 'START', mapId: 'room',
     player: { x: 3, y: 3, dir: 0, isMoving: false, moveProg: 0, team: [], storyProgress: 0 },
     battle: { enemy: null, turn: 'player' },
-    input: { up:false, down:false, left:false, right:false }
+    input: { up:false, down:false, left:false, right:false },
+    dialog: { active:false, text:'' }
 };
 
 // --- MAPAS ---
@@ -32,38 +35,35 @@ const MAPS = {
     'town': { w: 12, h: 12, data: [1,1,1,1,1,1,1,1,1,1,1,1, 1,0,0,0,1,9,1,0,0,0,0,1, 1,0,0,0,1,1,1,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,1, 1,0,0,0,0,0,0,0,0,0,0,1, 1,2,2,2,2,2,2,2,2,2,2,1, 1,2,2,2,2,2,2,2,2,2,2,1, 1,2,2,2,2,2,2,2,2,2,2,1, 1,2,2,2,2,2,2,2,2,2,2,1, 1,2,2,2,2,2,2,2,2,2,2,1, 1,1,1,1,1,1,1,1,1,1,1,1], warps: {'5,1':'room'}, warpDest: {'room':{x:3,y:5}} }
 };
 
-// --- MOTOR GRÁFICO Y TEXTURAS ---
+// --- MOTOR GRÁFICO ---
 let Ctx = null;
 const GFX = {
     textures: {},
     init: function() {
         const canvas = document.getElementById('game-canvas');
+        if(!canvas) { console.error("Canvas no encontrado"); return; }
         Ctx = canvas.getContext('2d');
         Ctx.imageSmoothingEnabled = false;
         this.generateTextures();
     },
-    // Genera patrones de 32x32 en memoria
     generateTextures: function() {
-        // 0: Suelo Metálico
+        if(!Ctx) return;
         this.textures[0] = this.createPattern(ctx => {
             ctx.fillStyle = '#2a2a35'; ctx.fillRect(0,0,32,32);
             ctx.strokeStyle = '#1a1a25'; ctx.strokeRect(0,0,32,32);
             ctx.fillStyle = '#3a3a45'; ctx.fillRect(4,4,2,2); ctx.fillRect(26,26,2,2);
         });
-        // 1: Muro Ladrillo Ciber
         this.textures[1] = this.createPattern(ctx => {
             ctx.fillStyle = '#4a4a55'; ctx.fillRect(0,0,32,32);
-            ctx.fillStyle = '#3a3a45'; ctx.fillRect(0,28,32,4); // Base
-            ctx.fillStyle = '#222'; ctx.fillRect(8,8,16,16); // Ventana
+            ctx.fillStyle = '#3a3a45'; ctx.fillRect(0,28,32,4);
+            ctx.fillStyle = '#222'; ctx.fillRect(8,8,16,16);
             ctx.fillStyle = 'rgba(0,255,242,0.6)'; ctx.fillRect(10,10,4,12); ctx.fillRect(18,10,4,12);
         });
-        // 2: Hierba Digital
         this.textures[2] = this.createPattern(ctx => {
             ctx.fillStyle = '#0f380f'; ctx.fillRect(0,0,32,32);
             ctx.fillStyle = '#306230'; for(let i=0;i<15;i++) ctx.fillRect(Math.random()*30,Math.random()*30,3,3);
-            ctx.fillStyle = '#00ffcc'; ctx.fillRect(5,5,2,2); ctx.fillRect(25,25,2,2); // Circuitos
+            ctx.fillStyle = '#00ffcc'; ctx.fillRect(5,5,2,2); ctx.fillRect(25,25,2,2);
         });
-        // 9: Puerta Oscura
         this.textures[9] = this.createPattern(ctx => {
             ctx.fillStyle = '#111'; ctx.fillRect(0,0,32,32);
             ctx.strokeStyle = '#333'; ctx.strokeRect(2,2,28,28);
@@ -76,35 +76,53 @@ const GFX = {
     }
 };
 
-// Dibuja un sprite de jugador más detallado
-function drawPlayerSprite(x, y, dir) {
-    const pX = Math.floor(x); const pY = Math.floor(y);
-    // Sombra
-    Ctx.fillStyle = 'rgba(0,0,0,0.3)'; Ctx.fillRect(pX+4, pY+26, 24, 6);
-    // Cuerpo/Chaqueta
-    Ctx.fillStyle = '#00aaff'; Ctx.fillRect(pX+8, pY+6, 16, 20);
-    // Pantalones
-    Ctx.fillStyle = '#222'; Ctx.fillRect(pX+10, pY+26, 12, 4);
-    // Gorra
-    Ctx.fillStyle = '#ff00ff'; Ctx.fillRect(pX+8, pY+2, 16, 6); Ctx.fillRect(pX+8, pY+6, 18, 2);
-    // Mochila (si mira de lado/arriba)
-    if(dir !== 0) { Ctx.fillStyle = '#666'; Ctx.fillRect(pX+6, pY+8, 4, 14); }
-    // Cara/Ojos
-    if(dir === 0) { // Abajo
-        Ctx.fillStyle = '#ffccaa'; Ctx.fillRect(pX+10, pY+8, 12, 8);
-        Ctx.fillStyle = '#000'; Ctx.fillRect(pX+12, pY+12, 2, 2); Ctx.fillRect(pX+18, pY+12, 2, 2);
-    } else if(dir === 2) { // Izq
-        Ctx.fillStyle = '#ffccaa'; Ctx.fillRect(pX+8, pY+8, 8, 8);
-        Ctx.fillStyle = '#000'; Ctx.fillRect(pX+8, pY+12, 2, 2);
-    } else if(dir === 3) { // Der
-        Ctx.fillStyle = '#ffccaa'; Ctx.fillRect(pX+16, pY+8, 8, 8);
-        Ctx.fillStyle = '#000'; Ctx.fillRect(pX+22, pY+12, 2, 2);
+// --- AUDIO (Protegido contra errores) ---
+const AudioEngine = {
+    ctx: null,
+    init: function() {
+        try {
+            window.AudioContext = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AudioContext();
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+        } catch(e) { console.log("Audio no soportado o bloqueado", e); }
+    },
+    playTone: function(freq, type, duration) {
+        if(!this.ctx) return;
+        try {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            osc.start(); osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+    },
+    sfx: {
+        select: ()=>AudioEngine.playTone(1200, 'square', 0.05),
+        bump: ()=>AudioEngine.playTone(150, 'sawtooth', 0.1),
+        battle: ()=>{ AudioEngine.playTone(600, 'square', 0.1); setTimeout(()=>AudioEngine.playTone(800, 'square', 0.2), 100); }
     }
+};
+
+// --- RENDERIZADO ---
+function drawPlayerSprite(x, y, dir) {
+    if(!Ctx) return;
+    const pX = Math.floor(x); const pY = Math.floor(y);
+    Ctx.fillStyle = '#00aaff'; Ctx.fillRect(pX+8, pY+6, 16, 20); // Cuerpo
+    Ctx.fillStyle = '#ff00ff'; Ctx.fillRect(pX+8, pY+2, 16, 6); // Gorra
+    Ctx.fillStyle = '#222'; Ctx.fillRect(pX+10, pY+26, 12, 4); // Pies
+    // Ojos
+    Ctx.fillStyle = '#000';
+    if(dir===0) { Ctx.fillRect(pX+10, pY+8, 2, 2); Ctx.fillRect(pX+20, pY+8, 2, 2); } // Abajo
+    else if(dir===2) { Ctx.fillRect(pX+8, pY+8, 2, 2); } // Izq
+    else if(dir===3) { Ctx.fillRect(pX+22, pY+8, 2, 2); } // Der
 }
 
 function render() {
-    if (!Ctx) return;
-    Ctx.fillStyle = '#0a0a10'; Ctx.fillRect(0,0,320,288); // Fondo limpio
+    if(!Ctx) return;
+    Ctx.fillStyle = '#0a0a10'; Ctx.fillRect(0,0,320,288);
 
     if(State.mode === 'BATTLE') { renderBattle(); return; }
 
@@ -117,7 +135,6 @@ function render() {
             const t = map.data[y*map.w + x];
             const dX = x*CFG.TILE - camX; const dY = y*CFG.TILE - camY;
             if(dX > -32 && dX < 320 && dY > -32 && dY < 288) {
-                // Usar texturas generadas
                 Ctx.fillStyle = GFX.textures[t] || '#000';
                 Ctx.fillRect(dX, dY, 32, 32);
             }
@@ -137,53 +154,57 @@ function render() {
 }
 
 function renderBattle() {
-    // Fondo de batalla con gradiente
+    if(!Ctx) return;
     const grd = Ctx.createLinearGradient(0,0,0,160);
     grd.addColorStop(0, '#1a1a24'); grd.addColorStop(1, '#0a0a12');
     Ctx.fillStyle = grd; Ctx.fillRect(0,0,320,160);
     
-    // Bases de neón
     Ctx.strokeStyle = '#00ffcc'; Ctx.lineWidth = 2; Ctx.fillStyle = 'rgba(0,255,204,0.2)';
     Ctx.beginPath(); Ctx.ellipse(240, 100, 60, 20, 0, 0, Math.PI*2); Ctx.fill(); Ctx.stroke();
     Ctx.beginPath(); Ctx.ellipse(80, 150, 60, 20, 0, 0, Math.PI*2); Ctx.fill(); Ctx.stroke();
 
-    // Placeholders para monstruos (Se podrían texturizar también)
-    Ctx.fillStyle = '#ff0055'; Ctx.fillRect(210, 40, 60, 60); // Enemy
-    Ctx.fillStyle = '#0055ff'; Ctx.fillRect(50, 90, 60, 60); // Player
+    Ctx.fillStyle = '#ff0055'; Ctx.fillRect(210, 40, 60, 60);
+    Ctx.fillStyle = '#0055ff'; Ctx.fillRect(50, 90, 60, 60);
 }
 
-// --- LÓGICA PRINCIPAL ---
+// --- LOGICA DEL JUEGO ---
 const Game = {
     init: function() {
         if(State.started) return;
         State.started = true;
+        
+        // Ocultar pantalla de inicio
         document.getElementById('click-to-start').style.display = 'none';
-        GFX.init(); // Inicializar gráficos y texturas
-        requestAnimationFrame(gameLoop); // Arrancar loop
+        
+        // Inicializar sistemas
+        GFX.init();
+        AudioEngine.init();
+        
+        // Arrancar Loop
+        requestAnimationFrame(gameLoop);
 
+        // Intro
         State.mode = 'DIALOG';
-        UI.dialog("Sistema iniciado. Bienvenido a Neos.");
+        UI.dialog("Sistema iniciado...");
+        
         setTimeout(() => {
             UI.hideDialog();
-            if(State.player.storyProgress === 0) {
-                State.mode = 'MENU';
-                document.getElementById('starter-selection').classList.remove('hidden');
-            } else { State.mode = 'EXPLORE'; }
-        }, 2000);
+            State.mode = 'MENU';
+            document.getElementById('starter-selection').classList.remove('hidden');
+        }, 1500);
     },
     chooseStarter: function(id) {
         const monData = DB.monsters[id];
         State.player.team.push({ ...monData, level: 5, hp: monData.maxHp, maxHp: monData.maxHp });
-        State.player.storyProgress = 1;
         document.getElementById('starter-selection').classList.add('hidden');
         State.mode = 'DIALOG';
-        UI.dialog(`¡Has sincronizado con ${monData.name}!`);
+        UI.dialog(`¡${monData.name} obtenido!`);
         setTimeout(() => { UI.hideDialog(); State.mode = 'EXPLORE'; }, 1500);
     },
     update: function() {
         if(State.mode === 'EXPLORE') {
             if(State.player.isMoving) {
-                State.player.moveProg += 0.15; // Más rápido
+                State.player.moveProg += 0.15;
                 if(State.player.moveProg >= 1) {
                     State.player.isMoving = false; State.player.moveProg = 0;
                     this.checkTileEvents();
@@ -209,7 +230,9 @@ const Game = {
         if(tile === 9) {
             const destId = map.warps[`${State.player.x},${State.player.y}`];
             const destCoords = map.warpDest[destId];
-            State.mapId = destId; State.player.x = destCoords.x; State.player.y = destCoords.y;
+            if(destId && destCoords) {
+                State.mapId = destId; State.player.x = destCoords.x; State.player.y = destCoords.y;
+            }
         }
         if(tile === 2 && Math.random() < 0.15) Battle.start();
     }
@@ -223,7 +246,7 @@ const Battle = {
         const enemyBase = DB.monsters[99];
         State.battle.enemy = { ...enemyBase, level: 3, hp: enemyBase.maxHp, maxHp: enemyBase.maxHp };
         this.updateUI();
-        UI.dialog(`¡ALERTA! ${State.battle.enemy.name} hostil detectado.`);
+        UI.dialog(`¡${State.battle.enemy.name} salvaje!`);
     },
     updateUI: function() {
         const p = State.player.team[0]; const e = State.battle.enemy;
@@ -249,7 +272,7 @@ const Battle = {
         if(State.battle.turn !== 'player') return;
         this.showMain(); document.getElementById('battle-menu').classList.add('hidden');
         const move = DB.moves[State.player.team[0].moves[idx]];
-        UI.dialog(`Ejecutando ${move.name}...`);
+        UI.dialog(`¡${move.name}!`);
         setTimeout(() => {
             State.battle.enemy.hp -= 10; if(State.battle.enemy.hp < 0) State.battle.enemy.hp = 0;
             this.updateUI();
@@ -258,16 +281,16 @@ const Battle = {
         }, 1000);
     },
     enemyTurn: function() {
-        UI.dialog(`El enemigo contraataca.`);
+        UI.dialog(`¡Enemigo ataca!`);
         setTimeout(() => {
             State.player.team[0].hp -= 5; if(State.player.team[0].hp < 0) State.player.team[0].hp = 0;
             this.updateUI();
-            if(State.player.team[0].hp <= 0) { UI.dialog("Unidad crítica..."); setTimeout(this.end, 2000); }
+            if(State.player.team[0].hp <= 0) { UI.dialog("Debilitado..."); setTimeout(this.end, 2000); }
             else { State.battle.turn = 'player'; document.getElementById('battle-menu').classList.remove('hidden'); UI.hideDialog(); }
         }, 1000);
     },
-    win: function() { UI.dialog("Amenaza neutralizada. +XP"); setTimeout(Battle.end, 2000); },
-    run: function() { UI.dialog("Retirada táctica."); setTimeout(Battle.end, 1000); },
+    win: function() { UI.dialog("¡Ganaste!"); setTimeout(this.end, 2000); },
+    run: function() { UI.dialog("Huiste."); setTimeout(this.end, 1000); },
     end: function() {
         document.getElementById('battle-ui').classList.add('hidden');
         UI.hideDialog(); State.mode = 'EXPLORE';
@@ -279,21 +302,28 @@ const UI = {
     hideDialog: function() { document.getElementById('dialog-box').classList.add('hidden'); }
 };
 
-// --- INPUTS CORREGIDOS ---
-// Función auxiliar para añadir listeners táctiles y evitar scroll
+// --- INPUT HANDLER (Seguro) ---
 function attachInput(id, key) {
     const btn = document.getElementById(id);
-    btn.addEventListener('touchstart', e => { e.preventDefault(); State.input[key] = true; btn.classList.add('pressed'); }, {passive: false});
-    btn.addEventListener('touchend', e => { e.preventDefault(); State.input[key] = false; btn.classList.remove('pressed'); }, {passive: false});
+    if(btn) {
+        btn.addEventListener('touchstart', e => { e.preventDefault(); State.input[key] = true; btn.classList.add('pressed'); }, {passive: false});
+        btn.addEventListener('touchend', e => { e.preventDefault(); State.input[key] = false; btn.classList.remove('pressed'); }, {passive: false});
+        // Mouse fallback para PC
+        btn.addEventListener('mousedown', e => { State.input[key] = true; btn.classList.add('pressed'); });
+        btn.addEventListener('mouseup', e => { State.input[key] = false; btn.classList.remove('pressed'); });
+    }
 }
-// Asignar eventos a los IDs del HTML
-attachInput('btn-up', 'up'); attachInput('btn-down', 'down');
-attachInput('btn-left', 'left'); attachInput('btn-right', 'right');
-document.getElementById('btn-a').addEventListener('touchstart', e=>{ e.preventDefault(); document.getElementById('btn-a').classList.add('pressed'); });
-document.getElementById('btn-a').addEventListener('touchend', e=>{ e.preventDefault(); document.getElementById('btn-a').classList.remove('pressed'); });
 
-// Inicio
-document.getElementById('click-to-start').addEventListener('touchstart', Game.init, {once:true});
-document.getElementById('click-to-start').addEventListener('click', Game.init, {once:true});
+// Iniciar Listeners al cargar
+window.onload = function() {
+    attachInput('btn-up', 'up'); attachInput('btn-down', 'down');
+    attachInput('btn-left', 'left'); attachInput('btn-right', 'right');
+    
+    const startBtn = document.getElementById('click-to-start');
+    if(startBtn) {
+        startBtn.addEventListener('click', Game.init);
+        startBtn.addEventListener('touchstart', Game.init);
+    }
+};
 
 function gameLoop() { Game.update(); render(); requestAnimationFrame(gameLoop); }
