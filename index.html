@@ -2,86 +2,80 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pokémon Neos - Cyberpunk RPG Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pokémon Neos - Fixed</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="scanline-overlay"></div>
-
-    <div id="start-overlay">
-        <div class="cyber-box title-box">
-            <h1>NEOS<br>CHRONICLES</h1>
-            <div class="subtitle">SYSTEM READY // v14.0 TEXTURED</div>
-        </div>
-        <p class="blink prompt">>>> TOCA PARA INICIAR SISTEMA <<<</p>
-    </div>
+    <div id="scanlines"></div>
 
     <div id="game-container">
-        <canvas id="game-canvas" width="320" height="288"></canvas>
-
-        <div id="ui-layer">
-            <div id="notification-area"></div>
+        <div id="screen-border">
+            <canvas id="game-canvas" width="320" height="288"></canvas>
             
-            <div id="dialog-box" class="cyber-box hidden">
-                <div id="dialog-text"></div>
-                <div class="arrow-next blink">▼</div>
-            </div>
+            <div id="ui-layer">
+                <div id="dialog-box" class="hidden">
+                    <p id="dialog-text"></p>
+                    <div class="arrow-blink">▼</div>
+                </div>
 
-            <div id="battle-ui" class="hidden">
-                <div class="battle-hud enemy cyber-box">
-                    <div class="name-tag"><span id="enemy-name">???</span> Lv<span id="enemy-lvl">0</span></div>
-                    <div class="hp-track"><div id="enemy-hp-bar" class="hp-fill"></div></div>
+                <div id="starter-selection" class="hidden">
+                    <h3>ELIGE TU COMPAÑERO</h3>
+                    <div class="starter-options">
+                        <button onclick="Game.chooseStarter(1)">SOLASAUR (Planta)</button>
+                        <button onclick="Game.chooseStarter(4)">CALDERÓN (Fuego)</button>
+                        <button onclick="Game.chooseStarter(7)">HIDROJET (Agua)</button>
+                    </div>
                 </div>
-                <div class="battle-hud player cyber-box">
-                    <div class="name-tag"><span id="player-name">???</span> Lv<span id="player-lvl">0</span></div>
-                    <div class="hp-track"><div id="player-hp-bar" class="hp-fill"></div></div>
-                    <div class="xp-track"><div id="player-xp-bar" class="xp-fill"></div></div>
-                    <div class="hp-nums"><span id="hp-cur">0</span>/<span id="hp-max">0</span></div>
-                </div>
-                <div id="battle-menu" class="cyber-box no-border">
-                    <button onclick="Game.battleInput('attack')">⚔️ ATACAR</button>
-                    <button onclick="Game.battleInput('bag')">🎒 MOCHILA</button>
-                    <button onclick="Game.battleInput('catch')">🕸️ CAPTURAR</button>
-                    <button onclick="Game.battleInput('run')">🏃 HUIR</button>
-                </div>
-                <div id="move-menu" class="cyber-box no-border hidden">
-                    <button id="move-btn-back" onclick="Game.battleInput('back')">↩️ VOLVER</button>
-                </div>
-            </div>
 
-            <div id="pause-menu" class="cyber-box hidden">
-                <div class="menu-header">TERMINAL PERSONAL</div>
-                <div class="menu-list">
-                    <button onclick="Game.menuAction('pokedex')">📼 Base de Datos</button>
-                    <button onclick="Game.menuAction('team')">👾 Equipo</button>
-                    <button onclick="Game.menuAction('bag')">🎒 Inventario</button>
-                    <button onclick="Game.menuAction('save')">💾 Guardar Estado</button>
-                    <button onclick="Game.menuAction('export')">📤 Exportar Datos</button>
-                    <button onclick="Game.menuAction('close')">❎ Cerrar Conexión</button>
+                <div id="battle-ui" class="hidden">
+                    <div class="hud enemy-hud">
+                        <span id="enemy-name">Rival</span> Lv<span id="enemy-lvl">5</span>
+                        <div class="hp-bar-bg"><div id="enemy-hp-bar" class="hp-fill"></div></div>
+                    </div>
+                    <div class="hud player-hud">
+                        <span id="player-name">Tu Mon</span> Lv<span id="player-lvl">5</span>
+                        <div class="hp-bar-bg"><div id="player-hp-bar" class="hp-fill"></div></div>
+                        <div class="hp-text"><span id="hp-cur">0</span>/<span id="hp-max">0</span></div>
+                        <div class="xp-bar-bg"><div id="player-xp-bar" class="xp-fill"></div></div>
+                    </div>
+                    
+                    <div id="battle-menu">
+                        <button onclick="Battle.showMoves()">LUCHAR</button>
+                        <button onclick="Battle.run()">HUIR</button>
+                    </div>
+
+                    <div id="move-menu" class="hidden">
+                        <button id="move-btn-0" onclick="Battle.useMove(0)">-</button>
+                        <button id="move-btn-1" onclick="Battle.useMove(1)">-</button>
+                        <button id="move-btn-back" onclick="Battle.showMain()">VOLVER</button>
+                    </div>
+                </div>
+
+                <div id="pause-menu" class="hidden">
+                    <button onclick="Game.saveGame()">GUARDAR</button>
+                    <button onclick="Game.togglePause()">CERRAR</button>
                 </div>
             </div>
         </div>
 
-        <div id="virtual-controls">
-            <div id="dpad" class="dpad-area">
-                <div class="dpad-btn up" data-key="ArrowUp"></div>
-                <div class="dpad-btn down" data-key="ArrowDown"></div>
-                <div class="dpad-btn left" data-key="ArrowLeft"></div>
-                <div class="dpad-btn right" data-key="ArrowRight"></div>
-                <div class="dpad-center"></div>
+        <div id="controls">
+            <div class="dpad">
+                <div class="btn up" ontouchstart="Input.press('up')" ontouchend="Input.release('up')"></div>
+                <div class="btn down" ontouchstart="Input.press('down')" ontouchend="Input.release('down')"></div>
+                <div class="btn left" ontouchstart="Input.press('left')" ontouchend="Input.release('left')"></div>
+                <div class="btn right" ontouchstart="Input.press('right')" ontouchend="Input.release('right')"></div>
             </div>
-            <div class="action-buttons">
-                <div class="btn-circle b-btn cyber-btn" data-key="b">B</div>
-                <div class="btn-circle a-btn cyber-btn" data-key="a">A</div>
+            <div class="actions">
+                <div class="btn-round b-btn" onclick="Input.press('b')">B</div>
+                <div class="btn-round a-btn" onclick="Input.press('a')">A</div>
             </div>
-            <div class="system-buttons">
-                <div class="btn-pill cyber-btn" data-key="start">START</div>
-            </div>
+            <div class="start-btn" onclick="Game.togglePause()">START</div>
         </div>
     </div>
+
+    <div id="click-to-start">TOCA PARA INICIAR</div>
 
     <script src="script.js"></script>
 </body>
