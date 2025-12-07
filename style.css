@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 :root {
-    --bg-dark: #101010;
-    --gb-screen: #000;
-    --ui-border: 2px solid #00ffcc;
-    --text-color: #00ffcc;
+    --bg-dark: #0a0a10;
+    --neon-cyan: #00ffcc;
+    --neon-pink: #ff00ff;
+    --ui-bg: rgba(10, 16, 20, 0.9);
+    --ui-border: 2px solid var(--neon-cyan);
 }
 
 * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
@@ -12,97 +13,121 @@
 body {
     margin: 0; background: #000; height: 100vh;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    font-family: 'VT323', monospace; color: var(--text-color);
+    font-family: 'VT323', monospace; color: var(--neon-cyan);
+    overflow: hidden; /* Evita scroll */
 }
 
+/* Efecto Scanline */
 #scanlines {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.2) 3px);
-    pointer-events: none; z-index: 10;
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.3) 3px);
+    pointer-events: none; z-index: 99;
 }
 
 #game-container {
     width: 320px; height: 580px;
     background: var(--bg-dark);
-    border: 1px solid #333;
+    border: 2px solid #333;
     display: flex; flex-direction: column;
     align-items: center;
-    padding-top: 20px;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
 }
 
 #screen-border {
-    position: relative;
-    width: 320px; height: 288px;
-    background: #000;
-    border-bottom: 2px solid #333;
+    position: relative; width: 320px; height: 288px;
+    background: #000; border-bottom: var(--ui-border);
 }
 
 canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 
-/* UI Layer */
+/* UI Layer & Cyber Styles */
 #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-#ui-layer > div { pointer-events: auto; } /* Permitir click en hijos */
-
+#ui-layer > div { pointer-events: auto; }
 .hidden { display: none !important; }
+
+.cyber-box {
+    background: var(--ui-bg); border: var(--ui-border);
+    padding: 10px; font-size: 1.3rem; color: #fff;
+    box-shadow: inset 0 0 10px rgba(0,255,204,0.2);
+}
+
+.cyber-box-sm {
+    background: var(--ui-bg); border: 1px solid var(--neon-cyan);
+    padding: 5px; font-size: 1rem; color: #fff;
+}
+
+.cyber-box-btm {
+    background: var(--ui-bg); border-top: var(--ui-border);
+}
+
+.cyber-btn, .cyber-btn-menu {
+    background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+    cursor: pointer; font-family: inherit; transition: all 0.1s;
+}
+.cyber-btn:active, .cyber-btn-menu:active { background: var(--neon-cyan); color: #000; }
 
 /* Diálogos */
 #dialog-box {
     position: absolute; bottom: 0; width: 100%; height: 80px;
-    background: rgba(0,0,0,0.9); border-top: var(--ui-border);
-    padding: 10px; font-size: 1.4rem; line-height: 1.1;
+    border-bottom: none; border-left: none; border-right: none;
 }
-.arrow-blink { position: absolute; bottom: 5px; right: 10px; animation: blink 1s infinite; }
+.arrow-blink { position: absolute; bottom: 5px; right: 10px; animation: blink 1s infinite; color: var(--neon-cyan); }
 
 /* Selección Inicial */
 #starter-selection {
     position: absolute; top: 50px; left: 10px; right: 10px;
-    background: #000; border: var(--ui-border); padding: 10px; text-align: center;
+    text-align: center;
 }
-.starter-options button { display: block; width: 100%; margin: 5px 0; padding: 10px; background: #222; color: #fff; border: 1px solid #555; cursor: pointer; font-family: inherit; font-size: 1.2rem; }
+.starter-options .cyber-btn { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 1.2rem; }
 
 /* Batalla */
 #battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.hud { position: absolute; background: rgba(0,0,0,0.8); border: 1px solid #fff; padding: 5px; width: 130px; font-size: 1rem; }
+.hud { position: absolute; width: 130px; }
 .enemy-hud { top: 10px; left: 10px; }
 .player-hud { bottom: 100px; right: 10px; }
 
-.hp-bar-bg { width: 100%; height: 6px; background: #555; margin-top: 2px; }
-.hp-fill { height: 100%; width: 100%; background: #0f0; transition: width 0.5s; }
-.xp-bar-bg { width: 100%; height: 2px; background: #333; margin-top: 2px; }
-.xp-fill { height: 100%; width: 0%; background: cyan; }
+.hp-bar-bg { width: 100%; height: 8px; background: #333; margin-top: 4px; border: 1px solid #555; }
+.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; }
 
 #battle-menu, #move-menu {
     position: absolute; bottom: 0; width: 100%; height: 90px;
-    background: #000; border-top: var(--ui-border);
     display: grid; grid-template-columns: 1fr 1fr;
 }
-#battle-menu button, #move-menu button {
-    background: transparent; border: 1px solid #333; color: white;
-    font-family: inherit; font-size: 1.5rem;
-}
-#battle-menu button:active { background: #00ffcc; color: black; }
-
-/* Pausa */
-#pause-menu {
-    position: absolute; top: 50px; right: 20px; width: 100px;
-    background: #000; border: var(--ui-border);
-}
-#pause-menu button { display: block; width: 100%; padding: 10px; background: transparent; color: white; border: none; border-bottom: 1px solid #333; font-family: inherit; font-size: 1.2rem; }
+.cyber-btn-menu { font-size: 1.4rem; border: 1px solid #333; }
 
 /* Controles */
-#controls { flex-grow: 1; width: 100%; position: relative; }
-.dpad { position: absolute; bottom: 40px; left: 20px; width: 120px; height: 120px; }
-.btn { position: absolute; width: 40px; height: 40px; background: #333; border: 1px solid #555; }
-.btn:active { background: #666; }
-.up { top: 0; left: 40px; } .down { bottom: 0; left: 40px; }
-.left { top: 40px; left: 0; } .right { top: 40px; right: 0; }
+#controls {
+    flex-grow: 1; width: 100%; position: relative; background: #111;
+    background-image: linear-gradient(rgba(0,255,204,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,204,0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+.dpad { position: absolute; bottom: 40px; left: 20px; width: 130px; height: 130px; }
+.btn { position: absolute; width: 44px; height: 44px; background: #222; border: 2px solid #444; }
+.btn.pressed { background: var(--neon-cyan); border-color: #fff; }
+.up { top: 0; left: 43px; border-radius: 5px 5px 0 0; }
+.down { bottom: 0; left: 43px; border-radius: 0 0 5px 5px; }
+.left { top: 43px; left: 0; border-radius: 5px 0 0 5px; }
+.right { top: 43px; right: 0; border-radius: 0 5px 5px 0; }
+.dpad-center { position: absolute; top: 43px; left: 43px; width: 44px; height: 44px; background: #1a1a1a; pointer-events: none; }
 
-.actions { position: absolute; bottom: 60px; right: 20px; display: flex; gap: 20px; }
-.btn-round { width: 60px; height: 60px; border-radius: 50%; background: #a00; border: 2px solid #500; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; }
-.btn-round:active { background: #f00; transform: translateY(2px); }
+.actions { position: absolute; bottom: 60px; right: 20px; display: flex; gap: 15px; }
+.btn-round {
+    width: 65px; height: 65px; border-radius: 50%;
+    background: #222; border: 2px solid var(--neon-pink); color: var(--neon-pink);
+    display: flex; justify-content: center; align-items: center; font-size: 1.8rem;
+    box-shadow: 0 0 10px var(--neon-pink);
+}
+.btn-round.pressed { background: var(--neon-pink); color: #000; transform: translateY(2px); }
+.b-btn { margin-top: 20px; border-color: #f1c40f; color: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
+.b-btn.pressed { background: #f1c40f; }
 
-.start-btn { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); background: #333; padding: 5px 20px; border-radius: 10px; border: 1px solid #555; font-size: 0.8rem; }
-
-#click-to-start { position: absolute; top:0; left:0; width:100%; height:100%; background:black; color:white; display:flex; justify-content:center; align-items:center; z-index:999; font-size:2rem; }
-
+/* Pantalla de Inicio */
+#click-to-start {
+    position: absolute; top:0; left:0; width:100%; height:100%;
+    background: #000; display:flex; justify-content:center; align-items:center;
+    z-index:999;
+    background-image: radial-gradient(circle, #111 0%, #000 80%);
+}
+.start-prompt { font-size: 1.5rem; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
+.blink, .arrow-blink { animation: blink 1s infinite step-end; }
 @keyframes blink { 50% { opacity: 0; } }
