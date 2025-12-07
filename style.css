@@ -4,7 +4,7 @@
     --bg-dark: #0a0a10;
     --neon-cyan: #00ffcc;
     --neon-pink: #ff00ff;
-    --ui-bg: rgba(10, 16, 20, 0.9);
+    --ui-bg: rgba(10, 16, 20, 0.95);
     --ui-border: 2px solid var(--neon-cyan);
 }
 
@@ -14,10 +14,9 @@ body {
     margin: 0; background: #000; height: 100vh;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
     font-family: 'VT323', monospace; color: var(--neon-cyan);
-    overflow: hidden; /* Evita scroll */
+    overflow: hidden;
 }
 
-/* Efecto Scanline */
 #scanlines {
     position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
     background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.3) 3px);
@@ -63,6 +62,7 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 .cyber-btn, .cyber-btn-menu {
     background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
     cursor: pointer; font-family: inherit; transition: all 0.1s;
+    text-shadow: 0 0 2px var(--neon-cyan);
 }
 .cyber-btn:active, .cyber-btn-menu:active { background: var(--neon-cyan); color: #000; }
 
@@ -95,6 +95,13 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 }
 .cyber-btn-menu { font-size: 1.4rem; border: 1px solid #333; }
 
+/* Pausa */
+#pause-menu {
+    position: absolute; top: 50px; left: 60px; right: 60px;
+    text-align: center;
+}
+#pause-menu button { display: block; width: 100%; margin-bottom: 10px; padding: 10px; }
+
 /* Controles */
 #controls {
     flex-grow: 1; width: 100%; position: relative; background: #111;
@@ -121,13 +128,18 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 .b-btn { margin-top: 20px; border-color: #f1c40f; color: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
 .b-btn.pressed { background: #f1c40f; }
 
+.start-btn { 
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); 
+    background: #333; padding: 5px 25px; border-radius: 10px; border: 1px solid #555; font-size: 1rem; color: #fff;
+}
+
 /* Pantalla de Inicio */
 #click-to-start {
     position: absolute; top:0; left:0; width:100%; height:100%;
     background: #000; display:flex; justify-content:center; align-items:center;
     z-index:999;
-    background-image: radial-gradient(circle, #111 0%, #000 80%);
 }
-.start-prompt { font-size: 1.5rem; color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan); }
-.blink, .arrow-blink { animation: blink 1s infinite step-end; }
+.start-content { text-align: center; }
+.start-content h1 { font-size: 4rem; color: var(--neon-cyan); margin: 0; text-shadow: 0 0 15px var(--neon-cyan); }
+.blink { animation: blink 1s infinite step-end; color: #fff; font-size: 1.5rem; margin-top: 20px; }
 @keyframes blink { 50% { opacity: 0; } }
