@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Neos - Fixed</title>
+    <title>Pokémon Neos - Final</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -62,10 +62,10 @@
 
         <div id="controls">
             <div class="dpad">
-                <div class="btn up" ontouchstart="Input.press('up')" ontouchend="Input.release('up')"></div>
-                <div class="btn down" ontouchstart="Input.press('down')" ontouchend="Input.release('down')"></div>
-                <div class="btn left" ontouchstart="Input.press('left')" ontouchend="Input.release('left')"></div>
-                <div class="btn right" ontouchstart="Input.press('right')" ontouchend="Input.release('right')"></div>
+                <div class="btn up" ontouchstart="Input.press('up'); event.preventDefault()" ontouchend="Input.release('up')"></div>
+                <div class="btn down" ontouchstart="Input.press('down'); event.preventDefault()" ontouchend="Input.release('down')"></div>
+                <div class="btn left" ontouchstart="Input.press('left'); event.preventDefault()" ontouchend="Input.release('left')"></div>
+                <div class="btn right" ontouchstart="Input.press('right'); event.preventDefault()" ontouchend="Input.release('right')"></div>
             </div>
             <div class="actions">
                 <div class="btn-round b-btn" onclick="Input.press('b')">B</div>
@@ -75,7 +75,9 @@
         </div>
     </div>
 
-    <div id="click-to-start">TOCA PARA INICIAR</div>
+    <div id="click-to-start" onclick="Game.init()" ontouchstart="Game.init()">
+        TOCA PARA INICIAR
+    </div>
 
     <script src="script.js"></script>
 </body>
