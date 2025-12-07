@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Pokémon Neos - Cyberpunk RPG</title>
+    <title>Pokémon Neos - Cyberpunk RPG Final</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+    <div id="scanline-overlay"></div>
+
     <div id="start-overlay">
-        <h1>NEOS<br>CHRONICLES</h1>
-        <p class="blink">TOCA PARA INICIAR SISTEMA</p>
-        <div class="version">v12.0 Gold Master</div>
+        <div class="cyber-box title-box">
+            <h1>NEOS<br>CHRONICLES</h1>
+            <div class="subtitle">SYSTEM READY // v14.0 TEXTURED</div>
+        </div>
+        <p class="blink prompt">>>> TOCA PARA INICIAR SISTEMA <<<</p>
     </div>
 
     <div id="game-container">
@@ -21,41 +25,42 @@
         <div id="ui-layer">
             <div id="notification-area"></div>
             
-            <div id="dialog-box" class="hidden">
+            <div id="dialog-box" class="cyber-box hidden">
                 <div id="dialog-text"></div>
-                <div class="arrow-next">▼</div>
+                <div class="arrow-next blink">▼</div>
             </div>
 
             <div id="battle-ui" class="hidden">
-                <div class="battle-hud enemy">
+                <div class="battle-hud enemy cyber-box">
                     <div class="name-tag"><span id="enemy-name">???</span> Lv<span id="enemy-lvl">0</span></div>
                     <div class="hp-track"><div id="enemy-hp-bar" class="hp-fill"></div></div>
                 </div>
-                <div class="battle-hud player">
+                <div class="battle-hud player cyber-box">
                     <div class="name-tag"><span id="player-name">???</span> Lv<span id="player-lvl">0</span></div>
                     <div class="hp-track"><div id="player-hp-bar" class="hp-fill"></div></div>
                     <div class="xp-track"><div id="player-xp-bar" class="xp-fill"></div></div>
                     <div class="hp-nums"><span id="hp-cur">0</span>/<span id="hp-max">0</span></div>
                 </div>
-                <div id="battle-menu">
-                    <button onclick="Game.battleInput('attack')">ATACAR</button>
-                    <button onclick="Game.battleInput('bag')">MOCHILA</button>
-                    <button onclick="Game.battleInput('catch')">CAPTURAR</button>
-                    <button onclick="Game.battleInput('run')">HUIR</button>
+                <div id="battle-menu" class="cyber-box no-border">
+                    <button onclick="Game.battleInput('attack')">⚔️ ATACAR</button>
+                    <button onclick="Game.battleInput('bag')">🎒 MOCHILA</button>
+                    <button onclick="Game.battleInput('catch')">🕸️ CAPTURAR</button>
+                    <button onclick="Game.battleInput('run')">🏃 HUIR</button>
                 </div>
-                <div id="move-menu" class="hidden">
-                    <button id="move-btn-back" onclick="Game.battleInput('back')">VOLVER</button>
+                <div id="move-menu" class="cyber-box no-border hidden">
+                    <button id="move-btn-back" onclick="Game.battleInput('back')">↩️ VOLVER</button>
                 </div>
             </div>
 
-            <div id="pause-menu" class="hidden">
+            <div id="pause-menu" class="cyber-box hidden">
+                <div class="menu-header">TERMINAL PERSONAL</div>
                 <div class="menu-list">
-                    <button onclick="Game.menuAction('pokedex')">Pokédex</button>
-                    <button onclick="Game.menuAction('team')">Equipo</button>
-                    <button onclick="Game.menuAction('bag')">Mochila</button>
-                    <button onclick="Game.menuAction('save')">Guardar</button>
-                    <button onclick="Game.menuAction('export')">Exportar Save</button>
-                    <button onclick="Game.menuAction('close')">Cerrar</button>
+                    <button onclick="Game.menuAction('pokedex')">📼 Base de Datos</button>
+                    <button onclick="Game.menuAction('team')">👾 Equipo</button>
+                    <button onclick="Game.menuAction('bag')">🎒 Inventario</button>
+                    <button onclick="Game.menuAction('save')">💾 Guardar Estado</button>
+                    <button onclick="Game.menuAction('export')">📤 Exportar Datos</button>
+                    <button onclick="Game.menuAction('close')">❎ Cerrar Conexión</button>
                 </div>
             </div>
         </div>
@@ -69,11 +74,11 @@
                 <div class="dpad-center"></div>
             </div>
             <div class="action-buttons">
-                <div class="btn-circle b-btn" data-key="b">B</div>
-                <div class="btn-circle a-btn" data-key="a">A</div>
+                <div class="btn-circle b-btn cyber-btn" data-key="b">B</div>
+                <div class="btn-circle a-btn cyber-btn" data-key="a">A</div>
             </div>
             <div class="system-buttons">
-                <div class="btn-pill" data-key="start">START</div>
+                <div class="btn-pill cyber-btn" data-key="start">START</div>
             </div>
         </div>
     </div>
