@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <title>Pokémon Neos - Platinum</title>
+    <title>Pokémon Neos - Platinum Edition</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -26,7 +25,7 @@
                 </div>
 
                 <div id="starter-selection" class="hidden cyber-box">
-                    <h3>SISTEMA DE INICIO</h3>
+                    <h3>INICIAR SISTEMA</h3>
                     <div class="starter-options">
                         <button class="cyber-btn" onclick="Game.chooseStarter(1)">SOLASAUR (Planta)</button>
                         <button class="cyber-btn" onclick="Game.chooseStarter(4)">CALDERÓN (Fuego)</button>
@@ -48,20 +47,30 @@
                     
                     <div id="battle-menu" class="cyber-box-btm">
                         <button class="cyber-btn-menu" onclick="Battle.showMoves()">⚔️ ATACAR</button>
+                        <button class="cyber-btn-menu" onclick="Battle.inputBag()">🎒 MOCHILA</button>
+                        <button class="cyber-btn-menu" onclick="Battle.tryCatch()">🕸️ CAPTURAR</button>
                         <button class="cyber-btn-menu" onclick="Battle.run()">🏃 HUIR</button>
                     </div>
 
                     <div id="move-menu" class="hidden cyber-box-btm">
-                        <button id="move-btn-0" class="cyber-btn-menu" onclick="Battle.useMove(0)">-</button>
-                        <button id="move-btn-1" class="cyber-btn-menu" onclick="Battle.useMove(1)">-</button>
-                        <button id="move-btn-back" class="cyber-btn-menu" onclick="Battle.showMain()">↩️ VOLVER</button>
+                        <div id="move-list-dynamic"></div>
+                        <button class="cyber-btn-menu full-width" onclick="Battle.showMain()">↩️ VOLVER</button>
                     </div>
                 </div>
 
-                <div id="pause-menu" class="hidden cyber-box">
-                    <div class="menu-title">MENÚ PAUSA</div>
+                <div id="pause-menu" class="hidden cyber-box menu-scroll">
+                    <div class="menu-title">TERMINAL</div>
+                    <button class="cyber-btn-menu" onclick="Game.showBag()">🎒 INVENTARIO</button>
+                    <button class="cyber-btn-menu" onclick="Game.showTeam()">👾 EQUIPO</button>
                     <button class="cyber-btn-menu" onclick="Game.saveGame()">💾 GUARDAR</button>
+                    <button class="cyber-btn-menu" onclick="Game.exportSave()">📤 EXPORTAR</button>
                     <button class="cyber-btn-menu" onclick="Game.togglePause()">❎ VOLVER</button>
+                </div>
+
+                <div id="bag-menu" class="hidden cyber-box menu-scroll">
+                    <div class="menu-title">MOCHILA</div>
+                    <div id="bag-list"></div>
+                    <button class="cyber-btn-menu" onclick="Game.closeBag()">↩️ CERRAR</button>
                 </div>
             </div>
         </div>
@@ -78,7 +87,7 @@
                 <div id="btn-b" class="btn-round b-btn">B</div>
                 <div id="btn-a" class="btn-round a-btn">A</div>
             </div>
-            <div class="start-btn" onclick="Game.togglePause()">START / MENU</div>
+            <div class="start-btn" onclick="Game.togglePause()">START</div>
         </div>
     </div>
 
@@ -86,7 +95,7 @@
         <div class="start-content">
             <h1>NEOS RPG</h1>
             <p class="blink">TOCA PARA INICIAR</p>
-            <div class="version">v23.0 PLATINUM</div>
+            <div class="version">v25.0 PLATINUM</div>
         </div>
     </div>
 
