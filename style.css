@@ -1,70 +1,88 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 :root {
-    --bg-dark: #0a0a10;
+    --bg-dark: #050505;
     --neon-cyan: #00ffcc;
     --neon-pink: #ff00ff;
-    --ui-bg: rgba(10, 16, 20, 0.95);
+    --ui-bg: rgba(5, 10, 15, 0.95);
     --ui-border: 2px solid var(--neon-cyan);
 }
 
-* { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: none; }
+/* BLINDAJE PARA MÓVIL */
+* { 
+    box-sizing: border-box; 
+    touch-action: none; /* Bloquea zoom y scroll */
+    user-select: none; /* Bloquea selección de texto */
+    -webkit-user-select: none; 
+    -webkit-touch-callout: none;
+}
 
 body {
-    margin: 0; background: #000; height: 100vh;
+    margin: 0; background: #000; height: 100vh; width: 100vw;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    font-family: 'VT323', monospace; color: var(--neon-cyan);
-    overflow: hidden;
+    font-family: 'VT323', monospace; color: var(--neon-cyan); overflow: hidden;
 }
 
 #scanlines {
-    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.3) 3px);
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.1) 3px);
     pointer-events: none; z-index: 99;
 }
 
 #game-container {
-    width: 320px; height: 580px;
-    background: var(--bg-dark);
-    border: 2px solid #333;
-    display: flex; flex-direction: column;
-    align-items: center;
-    box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+    width: 100%; max-width: 400px; height: 100%; max-height: 700px;
+    background: var(--bg-dark); border: 1px solid #333;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
 }
 
 #screen-border {
     position: relative; width: 320px; height: 288px;
-    background: #000; border-bottom: var(--ui-border);
+    background: #000; border-bottom: var(--ui-border); margin-top: 20px;
 }
 
 canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
 
-/* UI Layer & Cyber Styles */
+/* UI Layer */
 #ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 #ui-layer > div { pointer-events: auto; }
 .hidden { display: none !important; }
 
+/* Cyber Boxes */
 .cyber-box {
-    background: var(--ui-bg); border: var(--ui-border);
-    padding: 10px; font-size: 1.3rem; color: #fff;
-    box-shadow: inset 0 0 10px rgba(0,255,204,0.2);
+    background: var(--ui-bg); border: var(--ui-border); padding: 10px;
+    font-size: 1.3rem; color: #fff; box-shadow: inset 0 0 10px rgba(0,255,204,0.2);
 }
-
 .cyber-box-sm {
     background: var(--ui-bg); border: 1px solid var(--neon-cyan);
     padding: 5px; font-size: 1rem; color: #fff;
 }
+.cyber-box-btm { background: var(--ui-bg); border-top: var(--ui-border); }
 
-.cyber-box-btm {
-    background: var(--ui-bg); border-top: var(--ui-border);
-}
-
+/* Botones Estilo Menú */
 .cyber-btn, .cyber-btn-menu {
     background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
-    cursor: pointer; font-family: inherit; transition: all 0.1s;
-    text-shadow: 0 0 2px var(--neon-cyan);
+    cursor: pointer; font-family: inherit; transition: all 0.1s; width: 100%;
+    text-shadow: 0 0 2px var(--neon-cyan); margin-bottom: 5px; font-size: 1.2rem;
 }
 .cyber-btn:active, .cyber-btn-menu:active { background: var(--neon-cyan); color: #000; }
+
+/* HUD Batalla */
+#battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.hud { position: absolute; width: 130px; }
+.enemy-hud { top: 10px; left: 10px; }
+.player-hud { bottom: 100px; right: 10px; }
+
+.hp-bar-bg { width: 100%; height: 8px; background: #333; margin-top: 2px; border: 1px solid #555; }
+.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; }
+.xp-bar-bg { width: 100%; height: 4px; background: #222; margin-top: 4px; border: 1px solid #444; }
+.xp-fill { height: 100%; width: 0%; background: #3498db; transition: width 0.5s ease-out; box-shadow: 0 0 5px #3498db; }
+
+#battle-menu, #move-menu {
+    position: absolute; bottom: 0; width: 100%; height: 90px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
+}
+.cyber-btn-menu { font-size: 1.4rem; border: 1px solid #333; margin: 0; display:flex; justify-content:center; align-items:center;}
 
 /* Diálogos */
 #dialog-box {
@@ -73,44 +91,21 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 }
 .arrow-blink { position: absolute; bottom: 5px; right: 10px; animation: blink 1s infinite; color: var(--neon-cyan); }
 
-/* Selección Inicial */
-#starter-selection {
-    position: absolute; top: 50px; left: 10px; right: 10px;
-    text-align: center;
-}
-.starter-options .cyber-btn { display: block; width: 100%; margin: 10px 0; padding: 10px; font-size: 1.2rem; }
-
-/* Batalla */
-#battle-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-.hud { position: absolute; width: 130px; }
-.enemy-hud { top: 10px; left: 10px; }
-.player-hud { bottom: 100px; right: 10px; }
-
-.hp-bar-bg { width: 100%; height: 8px; background: #333; margin-top: 4px; border: 1px solid #555; }
-.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; }
-
-#battle-menu, #move-menu {
-    position: absolute; bottom: 0; width: 100%; height: 90px;
-    display: grid; grid-template-columns: 1fr 1fr;
-}
-.cyber-btn-menu { font-size: 1.4rem; border: 1px solid #333; }
-
-/* Pausa */
+/* Menú Pausa */
 #pause-menu {
-    position: absolute; top: 50px; left: 60px; right: 60px;
-    text-align: center;
+    position: absolute; top: 50px; left: 60px; right: 60px; text-align: center;
 }
-#pause-menu button { display: block; width: 100%; margin-bottom: 10px; padding: 10px; }
+.menu-title { color: var(--neon-pink); margin-bottom: 10px; font-weight: bold; }
 
-/* Controles */
+/* Controles Físicos */
 #controls {
     flex-grow: 1; width: 100%; position: relative; background: #111;
-    background-image: linear-gradient(rgba(0,255,204,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,204,0.05) 1px, transparent 1px);
+    background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px);
     background-size: 20px 20px;
 }
 .dpad { position: absolute; bottom: 40px; left: 20px; width: 130px; height: 130px; }
 .btn { position: absolute; width: 44px; height: 44px; background: #222; border: 2px solid #444; }
-.btn.pressed { background: var(--neon-cyan); border-color: #fff; }
+.btn.pressed { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
 .up { top: 0; left: 43px; border-radius: 5px 5px 0 0; }
 .down { bottom: 0; left: 43px; border-radius: 0 0 5px 5px; }
 .left { top: 43px; left: 0; border-radius: 5px 0 0 5px; }
@@ -130,16 +125,21 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 
 .start-btn { 
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); 
-    background: #333; padding: 5px 25px; border-radius: 10px; border: 1px solid #555; font-size: 1rem; color: #fff;
+    background: #333; padding: 5px 30px; border-radius: 10px; border: 1px solid #555; 
+    font-size: 1rem; color: #fff; letter-spacing: 2px;
 }
 
 /* Pantalla de Inicio */
 #click-to-start {
     position: absolute; top:0; left:0; width:100%; height:100%;
-    background: #000; display:flex; justify-content:center; align-items:center;
-    z-index:999;
+    background: #000; display:flex; justify-content:center; align-items:center; z-index:999;
 }
 .start-content { text-align: center; }
 .start-content h1 { font-size: 4rem; color: var(--neon-cyan); margin: 0; text-shadow: 0 0 15px var(--neon-cyan); }
-.blink { animation: blink 1s infinite step-end; color: #fff; font-size: 1.5rem; margin-top: 20px; }
+.blink { animation: blink 1s infinite step-end; color: #fff; margin-top: 20px; }
+.version { font-size: 0.8rem; color: #555; margin-top: 50px; }
+#toast-area { position: absolute; top: 10px; width: 100%; text-align: center; }
+.toast { display: inline-block; background: #000; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 10px; border-radius: 5px; animation: fadeOut 2s forwards; }
+
 @keyframes blink { 50% { opacity: 0; } }
+@keyframes fadeOut { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
