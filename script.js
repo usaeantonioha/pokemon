@@ -1,40 +1,71 @@
 /* =========================================
-   NEOS ENGINE v25.0 - PLATINUM GOLD MASTER
+   POKÉMON RED/BLUE STYLE ENGINE
    ========================================= */
 
 // --- CONFIGURACIÓN ---
 const CFG = { W: 320, H: 288, TILE: 32 };
+
+// Tabla de efectividad de tipos (estilo Pokémon)
+const TYPE_CHART = {
+    'Normal': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1},
+    'Fuego': {'Normal': 1, 'Fuego': 0.5, 'Agua': 0.5, 'Planta': 2, 'Eléctrico': 1},
+    'Agua': {'Normal': 1, 'Fuego': 2, 'Agua': 0.5, 'Planta': 0.5, 'Eléctrico': 1},
+    'Planta': {'Normal': 1, 'Fuego': 0.5, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 1},
+    'Eléctrico': {'Normal': 1, 'Fuego': 1, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 0.5}
+};
+
+function getTypeEffectiveness(moveType, defenderType) {
+    if (!TYPE_CHART[moveType]) return 1;
+    return TYPE_CHART[moveType][defenderType] || 1;
+}
+
 const DB = {
-    // 151 Monstruos + Omegear
+    // 151 Monstruos + Omegear - IDs corregidos
     monsters: {
-        1: { name: "SOLASAUR", type: "Planta", maxHp: 45, atk: 12, def: 10, moves: [0, 3] },
-        4: { name: "CALDERÓN", type: "Fuego", maxHp: 39, atk: 14, def: 9, moves: [1, 5] },
-        7: { name: "HIDROJET", type: "Agua", maxHp: 44, atk: 11, def: 13, moves: [2, 6] },
-        25: { name: "VOLTMOUSE", type: "Eléctrico", maxHp: 35, atk: 15, def: 8, moves: [0, 7] },
-        99: { name: "RATTABYTE", type: "Ciber", maxHp: 30, atk: 10, def: 8, moves: [0, 8] },
-        150: { name: "OMEGEAR", type: "Acero", maxHp: 150, atk: 25, def: 20, moves: [8, 5] }
+        1: { name: "BULBASAUR", type: "Planta", maxHp: 45, atk: 12, def: 10, moves: [0, 3], id: 1 },
+        4: { name: "CHARMANDER", type: "Fuego", maxHp: 39, atk: 14, def: 9, moves: [1, 5], id: 4 },
+        7: { name: "SQUIRTLE", type: "Agua", maxHp: 44, atk: 11, def: 13, moves: [2, 6], id: 7 },
+        25: { name: "PIKACHU", type: "Eléctrico", maxHp: 35, atk: 15, def: 8, moves: [0, 7], id: 25 },
+        99: { name: "RATTATA", type: "Normal", maxHp: 30, atk: 10, def: 8, moves: [0, 4], id: 99 },
+        150: { name: "MEWTWO", type: "Normal", maxHp: 150, atk: 25, def: 20, moves: [8, 5], id: 150 }
     },
     moves: [
-        {name: "PLACAJE", pwr: 40, type: "Normal"}, {name: "ASCUAS", pwr: 40, type: "Fuego"},
-        {name: "BURBUJA", pwr: 40, type: "Agua"}, {name: "HOJA", pwr: 45, type: "Planta"},
-        {name: "LATIGO", pwr: 0, type: "Normal"}, {name: "PIROTECNIA", pwr: 50, type: "Fuego"},
-        {name: "CHORRO", pwr: 50, type: "Agua"}, {name: "CHISPA", pwr: 45, type: "Eléctrico"},
-        {name: "HACKEO", pwr: 30, type: "Ciber"}
+        {name: "PLACAJE", pwr: 40, type: "Normal"},
+        {name: "ASCUAS", pwr: 40, type: "Fuego"},
+        {name: "BURBUJA", pwr: 40, type: "Agua"},
+        {name: "HOJA", pwr: 45, type: "Planta"},
+        {name: "LÁTIGO", pwr: 0, type: "Normal"},
+        {name: "LLAMARADA", pwr: 50, type: "Fuego"},
+        {name: "CHORRO", pwr: 50, type: "Agua"},
+        {name: "CHISPA", pwr: 45, type: "Eléctrico"},
+        {name: "PSÍQUICO", pwr: 60, type: "Normal"}
     ],
     items: {
         'potion': { name: "Poción", heal: 20 },
-        'cube': { name: "Neo-Cube", type: "ball", rate: 1.5 },
+        'cube': { name: "Poké Ball", type: "ball", rate: 1.5 },
         'key_alpha': { name: "Chip Alpha", key: true }
     }
 };
 
-const PREFIX = ["NEO", "CYBER", "MECHA", "IRON", "DATA", "VOLT", "NANO"];
-const SUFFIX = ["BOT", "DROID", "REX", "WING", "BYTE", "SOUL", "CORE"];
+const PREFIX = ["BULBA", "CHAR", "SQUIRT", "PIKA", "RATTA", "MEW"];
+const SUFFIX = ["SAUR", "MANDER", "TLE", "CHU", "TATA", "TWO"];
 function getMonster(id) {
-    if(DB.monsters[id]) return JSON.parse(JSON.stringify(DB.monsters[id]));
+    if(DB.monsters[id]) {
+        const mon = DB.monsters[id];
+        return JSON.parse(JSON.stringify(mon));
+    }
+    // Generar monstruo aleatorio con ID correcto
     const seed = id * 1337;
     const name = PREFIX[id % PREFIX.length] + SUFFIX[(id*3) % SUFFIX.length];
-    return { name: name, type: "Normal", maxHp: 40 + (id%20), atk: 10+(id%5), def: 10+(id%5), moves:[0,4] };
+    return { 
+        name: name, 
+        type: "Normal", 
+        maxHp: 40 + (id%20), 
+        atk: 10+(id%5), 
+        def: 10+(id%5), 
+        moves:[0,4],
+        id: id  // FIX: Añadir ID al monstruo generado
+    };
 }
 
 // --- ESTADO ---
@@ -66,7 +97,15 @@ const MAPS = {
     }
 };
 
-// --- MOTOR GRÁFICO (Texturas Re-Indexadas) ---
+// Paleta GameBoy original (4 tonos verde)
+const GB_COLORS = {
+    darkest: '#0f380f',  // Negro
+    dark: '#306230',     // Verde oscuro
+    light: '#8bac0f',    // Verde claro
+    lightest: '#9bbc0f'  // Verde muy claro
+};
+
+// --- MOTOR GRÁFICO (Estilo GameBoy) ---
 let Ctx = null;
 const GFX = {
     textures: {},
@@ -79,41 +118,99 @@ const GFX = {
     },
     genPatterns: function() {
         const mkPat = (fn) => { const c=document.createElement('canvas');c.width=32;c.height=32;fn(c.getContext('2d'));return Ctx.createPattern(c,'repeat'); };
-        // 0-9: Básicos
-        this.textures[0] = mkPat(c=>{ c.fillStyle='#222';c.fillRect(0,0,32,32);c.strokeStyle='#333';c.strokeRect(0,0,32,32); c.fillStyle='#444';c.fillRect(2,2,2,2);c.fillRect(28,28,2,2); }); // Suelo
-        this.textures[1] = mkPat(c=>{ c.fillStyle='#555';c.fillRect(0,0,32,32);c.fillStyle='#222';c.fillRect(8,8,16,16); c.fillStyle='rgba(0,255,255,0.2)';c.fillRect(10,10,4,12); }); // Muro
+        // 0-9: Básicos - Paleta GameBoy
+        this.textures[0] = mkPat(c=>{ c.fillStyle=GB_COLORS.lightest;c.fillRect(0,0,32,32);c.strokeStyle=GB_COLORS.light;c.strokeRect(0,0,32,32); }); // Suelo
+        this.textures[1] = mkPat(c=>{ c.fillStyle=GB_COLORS.dark;c.fillRect(0,0,32,32);c.fillStyle=GB_COLORS.darkest;c.fillRect(8,8,16,16); }); // Muro
         // 10-19: Naturaleza
-        this.textures[2] = mkPat(c=>{ c.fillStyle='#0f380f';c.fillRect(0,0,32,32);c.fillStyle='#2ecc71'; for(let i=0;i<12;i++)c.fillRect(Math.random()*28,Math.random()*28,4,4); }); // Hierba
-        this.textures[4] = mkPat(c=>{ c.fillStyle='#000';c.fillRect(0,0,32,32);c.strokeStyle='#ff0000';c.lineWidth=2;c.strokeRect(4,4,24,24);c.fillStyle='#ff0000';c.fillText("BOSS",6,20); }); // Boss Tile
+        this.textures[2] = mkPat(c=>{ c.fillStyle=GB_COLORS.lightest;c.fillRect(0,0,32,32);c.fillStyle=GB_COLORS.light; for(let i=0;i<8;i++)c.fillRect(4+Math.floor(i/2)*8,(i%4)*8,4,4); }); // Hierba
+        this.textures[4] = mkPat(c=>{ c.fillStyle=GB_COLORS.darkest;c.fillRect(0,0,32,32);c.strokeStyle=GB_COLORS.light;c.lineWidth=2;c.strokeRect(4,4,24,24);c.fillStyle=GB_COLORS.light;c.fillText("BOSS",8,20); }); // Boss Tile
         // 20-29: Urbano
-        this.textures[9] = mkPat(c=>{ c.fillStyle='#000';c.fillRect(0,0,32,32); }); // Puerta
-        this.textures[8] = mkPat(c=>{ c.fillStyle='#fff';c.fillRect(0,0,32,32);c.fillStyle='#f00';c.fillRect(12,4,8,24);c.fillRect(4,12,24,8); }); // Medico
+        this.textures[9] = mkPat(c=>{ c.fillStyle=GB_COLORS.darkest;c.fillRect(0,0,32,32); }); // Puerta
+        this.textures[8] = mkPat(c=>{ c.fillStyle=GB_COLORS.lightest;c.fillRect(0,0,32,32);c.fillStyle='#f00';c.fillRect(12,4,8,24);c.fillRect(4,12,24,8); }); // Centro Pokémon
     },
-    drawPlayer: function(x, y, dir) {
+    drawPlayer: function(x, y, dir, frame) {
         if(!Ctx) return;
         const px = Math.floor(x); const py = Math.floor(y);
-        Ctx.fillStyle = 'rgba(0,0,0,0.5)'; Ctx.fillRect(px+6, py+26, 20, 4);
-        Ctx.fillStyle = '#00aaff'; Ctx.fillRect(px+8, py+10, 16, 12);
-        Ctx.fillStyle = '#222'; Ctx.fillRect(px+10, py+22, 12, 6);
-        Ctx.fillStyle = '#ffccaa'; Ctx.fillRect(px+8, py+2, 16, 10);
-        Ctx.fillStyle = '#ff0055'; Ctx.fillRect(px+8, py+0, 16, 4); Ctx.fillRect(px+8, py+4, 18, 2);
-        Ctx.fillStyle = '#000';
-        if(dir===0){ Ctx.fillRect(px+12,py+8,2,2); Ctx.fillRect(px+18,py+8,2,2); }
-        else if(dir===2){ Ctx.fillRect(px+8,py+8,2,2); }
-        else if(dir===3){ Ctx.fillRect(px+22,py+8,2,2); }
+        // Sombra
+        Ctx.fillStyle = GB_COLORS.dark; Ctx.fillRect(px+6, py+26, 20, 4);
+        // Cuerpo (estilo pixel art simple)
+        Ctx.fillStyle = GB_COLORS.darkest; Ctx.fillRect(px+8, py+10, 16, 14);
+        // Pantalones
+        Ctx.fillStyle = GB_COLORS.dark; Ctx.fillRect(px+10, py+22, 12, 6);
+        // Cabeza
+        Ctx.fillStyle = GB_COLORS.lightest; Ctx.fillRect(px+8, py+2, 16, 10);
+        // Gorra
+        Ctx.fillStyle = GB_COLORS.darkest; Ctx.fillRect(px+8, py+0, 16, 4);
+        Ctx.fillRect(px+8, py+4, 18, 2);
+        // Ojos (dirección)
+        Ctx.fillStyle = GB_COLORS.darkest;
+        if(dir===0){ // Arriba - no se ven ojos
+            Ctx.fillRect(px+10,py+6,4,2); Ctx.fillRect(px+18,py+6,4,2);
+        } else if(dir===1){ // Abajo
+            Ctx.fillRect(px+12,py+8,2,2); Ctx.fillRect(px+18,py+8,2,2);
+        } else if(dir===2){ // Izquierda
+            Ctx.fillRect(px+10,py+8,2,2);
+        } else if(dir===3){ // Derecha
+            Ctx.fillRect(px+20,py+8,2,2);
+        }
+        // Animación de caminar (brazos)
+        if(frame > 0) {
+            Ctx.fillStyle = GB_COLORS.dark;
+            if(frame % 2 === 0) {
+                Ctx.fillRect(px+6, py+14, 4, 6);
+            } else {
+                Ctx.fillRect(px+22, py+14, 4, 6);
+            }
+        }
     },
     getMonster: function(id) {
         const c = document.createElement('canvas'); c.width=64; c.height=64;
         const ctx = c.getContext('2d');
-        const seed = id * 937; const hue = (id*40)%360;
-        ctx.fillStyle = `hsl(${hue}, 70%, 50%)`;
-        for(let y=12; y<52; y+=4) {
-            for(let x=16; x<48; x+=4) {
-                if(Math.sin(x*y*seed) > 0.1) { ctx.fillRect(x,y,4,4); ctx.fillRect(64-x-4,y,4,4); }
+        
+        // Limpiar con transparencia
+        ctx.clearRect(0, 0, 64, 64);
+        
+        // Colores basados en tipo para sprites más reconocibles
+        let color1 = GB_COLORS.darkest;
+        let color2 = GB_COLORS.dark;
+        
+        const monData = DB.monsters[id];
+        if(monData) {
+            switch(monData.type) {
+                case 'Planta': color1 = '#2d5a27'; color2 = '#4a7c3f'; break;
+                case 'Fuego': color1 = '#8b4513'; color2 = '#cd5c5c'; break;
+                case 'Agua': color1 = '#4169e1'; color2 = '#6495ed'; break;
+                case 'Eléctrico': color1 = '#daa520'; color2 = '#ffd700'; break;
+                default: color1 = GB_COLORS.darkest; color2 = GB_COLORS.dark;
             }
         }
-        ctx.fillStyle = '#fff'; ctx.fillRect(24,24,6,6); ctx.fillRect(34,24,6,6);
-        ctx.fillStyle = '#000'; ctx.fillRect(26,26,2,2); ctx.fillRect(36,26,2,2);
+        
+        // Dibujar sprite estilo pixel art 8-bit
+        const seed = id * 937;
+        
+        // Cuerpo base (elipse pixelada)
+        ctx.fillStyle = color2;
+        for(let y=20; y<50; y+=4) {
+            for(let x=20; x<44; x+=4) {
+                const dist = Math.sqrt((x-32)*(x-32) + (y-35)*(y-35));
+                if(dist < 14) {
+                    ctx.fillRect(x, y, 4, 4);
+                }
+            }
+        }
+        
+        // Detalles (ojos)
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(26, 28, 6, 6);
+        ctx.fillRect(36, 28, 6, 6);
+        ctx.fillStyle = '#000';
+        ctx.fillRect(28, 30, 3, 3);
+        ctx.fillRect(38, 30, 3, 3);
+        
+        // Boca
+        ctx.fillStyle = '#000';
+        ctx.fillRect(30, 38, 8, 2);
+        
         return c;
     }
 };
@@ -221,12 +318,12 @@ const Game = {
         if(tile === 4) {
             Battle.start(true); // true = Boss
         }
-        // Wild Battle
-        if(tile === 2 && Math.random() < 0.15) Battle.start(false);
+        // Wild Battle - 10% probability (Pokémon style)
+        if(tile === 2 && Math.random() < 0.10) Battle.start(false);
     },
     render: function() {
         if(!Ctx) return;
-        Ctx.fillStyle = '#000'; Ctx.fillRect(0,0,CFG.W,CFG.H);
+        Ctx.fillStyle = GB_COLORS.lightest; Ctx.fillRect(0,0,CFG.W,CFG.H);
         if(State.mode === 'BATTLE') { Battle.render(); return; }
         
         const map = MAPS[State.mapId];
@@ -239,20 +336,23 @@ const Game = {
                 const t = map.data[y*map.w+x];
                 const dx = x*CFG.TILE - camX; const dy = y*CFG.TILE - camY;
                 if(dx>-32 && dx<320 && dy>-32 && dy<288) {
-                    Ctx.fillStyle = GFX.textures[t] || '#000';
+                    Ctx.fillStyle = GFX.textures[t] || GB_COLORS.lightest;
                     Ctx.fillRect(dx, dy, 32, 32);
                 }
             }
         }
         let pVisX = (p.x * CFG.TILE) - camX; let pVisY = (p.y * CFG.TILE) - camY;
+        // Animation frame for walking
+        let frame = 0;
         if(p.isMoving) {
             const dist = p.moveProg * CFG.TILE;
             if(p.dir===0) pVisY = ((p.y-1)*CFG.TILE)-camY + dist;
             if(p.dir===1) pVisY = ((p.y+1)*CFG.TILE)-camY - dist;
             if(p.dir===2) pVisX = ((p.x+1)*CFG.TILE)-camX - dist;
             if(p.dir===3) pVisX = ((p.x-1)*CFG.TILE)-camX + dist;
+            frame = Math.floor(p.moveProg * 4) + 1;
         }
-        GFX.drawPlayer(pVisX, pVisY, p.dir);
+        GFX.drawPlayer(pVisX, pVisY, p.dir, frame);
     },
     // Menús
     togglePause: function() {
@@ -412,15 +512,20 @@ const Battle = {
     },
     render: function() {
         const grd = Ctx.createLinearGradient(0,0,0,160);
-        grd.addColorStop(0, '#1a1a24'); grd.addColorStop(1, '#0a0a12');
+        grd.addColorStop(0, GB_COLORS.lightest); grd.addColorStop(1, GB_COLORS.light);
         Ctx.fillStyle = grd; Ctx.fillRect(0,0,320,160);
-        Ctx.strokeStyle = '#00ffcc'; Ctx.lineWidth = 2; Ctx.fillStyle = 'rgba(0,255,204,0.2)';
-        Ctx.beginPath(); Ctx.ellipse(240, 100, 60, 20, 0, 0, Math.PI*2); Ctx.fill(); Ctx.stroke();
-        Ctx.beginPath(); Ctx.ellipse(80, 150, 60, 20, 0, 0, Math.PI*2); Ctx.fill(); Ctx.stroke();
+        // Plataforma enemiga
+        Ctx.fillStyle = GB_COLORS.dark;
+        Ctx.beginPath(); Ctx.ellipse(240, 100, 60, 20, 0, 0, Math.PI*2); Ctx.fill();
+        // Plataforma jugador
+        Ctx.fillStyle = GB_COLORS.dark;
+        Ctx.beginPath(); Ctx.ellipse(80, 150, 60, 20, 0, 0, Math.PI*2); Ctx.fill();
         if(State.battle.enemy) Ctx.drawImage(GFX.getMonster(State.battle.enemy.id || 99), 208, 68);
-        if(State.player.team[0]) Ctx.drawImage(GFX.getMonster(State.player.team[0].id), 48, 118);
+        if(State.player.team[0]) Ctx.drawImage(GFX.getMonster(State.player.team[0].id || 1), 48, 118);
     }
 };
+
+// FIX: Eliminar función gameLoop duplicada (código muerto línea 451)
 
 const UI = {
     dialog: function(text) { document.getElementById('dialog-box').classList.remove('hidden'); document.getElementById('dialog-text').innerText = text; },
@@ -448,4 +553,4 @@ window.onload = function() {
     document.addEventListener('visibilitychange', () => { if(!document.hidden) { Audio.resume(); State.lastTime = performance.now(); } });
 };
 
-function gameLoop() { Game.update(); Game.render(); requestAnimationFrame(gameLoop); }
+// FIX: Eliminar función gameLoop duplicada - ya usamos requestAnimationFrame en Game.loop
