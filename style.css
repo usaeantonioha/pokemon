@@ -1,37 +1,39 @@
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
 :root {
-    --bg-dark: #050505;
-    --neon-cyan: #00ffcc;
-    --neon-pink: #ff00ff;
-    --ui-bg: rgba(5, 10, 15, 0.98);
-    --ui-border: 2px solid var(--neon-cyan);
+    /* Paleta GameBoy original */
+    --gb-darkest: #0f380f;
+    --gb-dark: #306230;
+    --gb-light: #8bac0f;
+    --gb-lightest: #9bbc0f;
+    --ui-bg: rgba(155, 188, 15, 0.98);
+    --ui-border: 2px solid var(--gb-darkest);
 }
 
 * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 
 body {
-    margin: 0; background: #000; height: 100vh; width: 100vw;
+    margin: 0; background: #8bac0f; height: 100vh; width: 100vw;
     display: flex; flex-direction: column; justify-content: center; align-items: center;
-    font-family: 'VT323', monospace; color: var(--neon-cyan); overflow: hidden;
+    font-family: 'VT323', monospace; color: var(--gb-darkest); overflow: hidden;
 }
 
 #scanlines {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.1) 3px);
+    background: repeating-linear-gradient(0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.05) 3px);
     pointer-events: none; z-index: 99;
 }
 
 #game-container {
     width: 100%; max-width: 400px; height: 100%; max-height: 750px;
-    background: var(--bg-dark); border: 1px solid #333;
+    background: var(--gb-lightest); border: 4px solid var(--gb-dark);
     display: flex; flex-direction: column; align-items: center;
-    box-shadow: 0 0 20px rgba(0, 255, 204, 0.1);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
 }
 
 #screen-border {
     position: relative; width: 320px; height: 288px;
-    background: #000; border-bottom: var(--ui-border); margin-top: 20px; flex-shrink: 0;
+    background: var(--gb-lightest); border-bottom: var(--ui-border); margin-top: 20px; flex-shrink: 0;
 }
 
 canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
@@ -41,29 +43,29 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 #ui-layer > div { pointer-events: auto; }
 .hidden { display: none !important; }
 
-/* Estilos Generales UI */
+/* Estilos Generales UI - Estilo GameBoy */
 .cyber-box {
     background: var(--ui-bg); border: var(--ui-border); padding: 10px;
-    font-size: 1.3rem; color: #fff; box-shadow: inset 0 0 10px rgba(0,255,204,0.2);
+    font-size: 1.3rem; color: var(--gb-darkest); box-shadow: inset 0 0 10px rgba(15, 56, 15, 0.2);
 }
 .cyber-box-sm {
-    background: var(--ui-bg); border: 1px solid var(--neon-cyan);
-    padding: 5px; font-size: 1rem; color: #fff;
+    background: var(--ui-bg); border: 1px solid var(--gb-darkest);
+    padding: 5px; font-size: 1rem; color: var(--gb-darkest);
 }
 .cyber-box-btm { background: var(--ui-bg); border-top: var(--ui-border); }
 
 .cyber-btn, .cyber-btn-menu {
-    background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+    background: transparent; border: 1px solid var(--gb-darkest); color: var(--gb-darkest);
     cursor: pointer; font-family: inherit; transition: all 0.1s; width: 100%;
-    text-shadow: 0 0 2px var(--neon-cyan); margin-bottom: 5px; font-size: 1.2rem;
+    text-shadow: none; margin-bottom: 5px; font-size: 1.2rem;
 }
-.cyber-btn:active, .cyber-btn-menu:active { background: var(--neon-cyan); color: #000; }
+.cyber-btn:active, .cyber-btn-menu:active { background: var(--gb-dark); color: var(--gb-lightest); }
 
 /* Scrollable Menus */
 .menu-scroll {
     max-height: 200px; overflow-y: auto; 
     position: absolute; top: 40px; left: 40px; right: 40px;
-    scrollbar-width: thin; scrollbar-color: var(--neon-cyan) #000;
+    scrollbar-width: thin; scrollbar-color: var(--gb-darkest) var(--gb-lightest);
 }
 
 /* HUD Batalla */
@@ -72,16 +74,16 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
 .enemy-hud { top: 10px; left: 10px; }
 .player-hud { bottom: 100px; right: 10px; }
 
-.hp-bar-bg { width: 100%; height: 8px; background: #333; margin-top: 2px; border: 1px solid #555; }
-.hp-fill { height: 100%; width: 100%; background: #2ecc71; transition: width 0.5s; }
-.xp-bar-bg { width: 100%; height: 4px; background: #222; margin-top: 4px; border: 1px solid #444; }
-.xp-fill { height: 100%; width: 0%; background: #3498db; transition: width 0.5s ease-out; }
+.hp-bar-bg { width: 100%; height: 8px; background: var(--gb-dark); margin-top: 2px; border: 1px solid var(--gb-darkest); }
+.hp-fill { height: 100%; width: 100%; background: var(--gb-light); transition: width 0.5s; }
+.xp-bar-bg { width: 100%; height: 4px; background: var(--gb-dark); margin-top: 4px; border: 1px solid var(--gb-darkest); }
+.xp-fill { height: 100%; width: 0%; background: var(--gb-darkest); transition: width 0.5s ease-out; }
 
 #battle-menu, #move-menu {
     position: absolute; bottom: 0; width: 100%; height: 90px;
     display: grid; grid-template-columns: 1fr 1fr; gap: 2px;
 }
-.cyber-btn-menu { font-size: 1.4rem; border: 1px solid #333; margin: 0; display:flex; justify-content:center; align-items:center;}
+.cyber-btn-menu { font-size: 1.4rem; border: 1px solid var(--gb-darkest); margin: 0; display:flex; justify-content:center; align-items:center;}
 .full-width { grid-column: span 2; }
 
 /* Diálogos */
@@ -89,48 +91,48 @@ canvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; 
     position: absolute; bottom: 0; width: 100%; height: 80px;
     border-bottom: none; border-left: none; border-right: none;
 }
-.arrow-blink { position: absolute; bottom: 5px; right: 10px; animation: blink 1s infinite; color: var(--neon-cyan); }
+.arrow-blink { position: absolute; bottom: 5px; right: 10px; animation: blink 1s infinite; color: var(--gb-darkest); }
 
-/* Controles */
+/* Controles - Estilo GameBoy */
 #controls {
-    flex-grow: 1; width: 100%; position: relative; background: #111;
-    background-image: linear-gradient(#1a1a1a 1px, transparent 1px), linear-gradient(90deg, #1a1a1a 1px, transparent 1px);
+    flex-grow: 1; width: 100%; position: relative; background: var(--gb-lightest);
+    background-image: linear-gradient(var(--gb-light) 1px, transparent 1px), linear-gradient(90deg, var(--gb-light) 1px, transparent 1px);
     background-size: 20px 20px;
 }
 .dpad { position: absolute; bottom: 40px; left: 20px; width: 130px; height: 130px; }
-.btn { position: absolute; width: 44px; height: 44px; background: #222; border: 2px solid #444; }
-.btn.pressed { background: var(--neon-cyan); box-shadow: 0 0 10px var(--neon-cyan); }
+.btn { position: absolute; width: 44px; height: 44px; background: var(--gb-dark); border: 2px solid var(--gb-darkest); }
+.btn.pressed { background: var(--gb-darkest); box-shadow: 0 0 10px var(--gb-darkest); }
 .up { top: 0; left: 43px; border-radius: 5px 5px 0 0; }
 .down { bottom: 0; left: 43px; border-radius: 0 0 5px 5px; }
 .left { top: 43px; left: 0; border-radius: 5px 0 0 5px; }
 .right { top: 43px; right: 0; border-radius: 0 5px 5px 0; }
-.dpad-center { position: absolute; top: 43px; left: 43px; width: 44px; height: 44px; background: #1a1a1a; pointer-events: none; }
+.dpad-center { position: absolute; top: 43px; left: 43px; width: 44px; height: 44px; background: var(--gb-light); pointer-events: none; }
 
 .actions { position: absolute; bottom: 60px; right: 20px; display: flex; gap: 15px; }
 .btn-round {
     width: 65px; height: 65px; border-radius: 50%;
-    background: #222; border: 2px solid var(--neon-pink); color: var(--neon-pink);
+    background: var(--gb-dark); border: 2px solid var(--gb-darkest); color: var(--gb-darkest);
     display: flex; justify-content: center; align-items: center; font-size: 1.8rem;
-    box-shadow: 0 0 10px var(--neon-pink);
+    box-shadow: 0 0 10px var(--gb-darkest);
 }
-.btn-round.pressed { background: var(--neon-pink); color: #000; transform: translateY(2px); }
-.b-btn { margin-top: 20px; border-color: #f1c40f; color: #f1c40f; box-shadow: 0 0 10px #f1c40f; }
-.b-btn.pressed { background: #f1c40f; }
+.btn-round.pressed { background: var(--gb-darkest); color: var(--gb-lightest); transform: translateY(2px); }
+.b-btn { margin-top: 20px; border-color: var(--gb-darkest); color: var(--gb-darkest); box-shadow: 0 0 10px var(--gb-darkest); }
+.b-btn.pressed { background: var(--gb-darkest); }
 
 .start-btn { 
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); 
-    background: #333; padding: 5px 30px; border-radius: 10px; border: 1px solid #555; 
-    font-size: 1rem; color: #fff; letter-spacing: 2px;
+    background: var(--gb-dark); padding: 5px 30px; border-radius: 10px; border: 1px solid var(--gb-darkest); 
+    font-size: 1rem; color: var(--gb-lightest); letter-spacing: 2px;
 }
 
 #click-to-start {
     position: absolute; top:0; left:0; width:100%; height:100%;
-    background: #000; display:flex; justify-content:center; align-items:center; z-index:999;
+    background: var(--gb-lightest); display:flex; justify-content:center; align-items:center; z-index:999;
 }
 .start-content { text-align: center; }
-.start-content h1 { font-size: 4rem; color: var(--neon-cyan); margin: 0; text-shadow: 0 0 15px var(--neon-cyan); }
-.blink { animation: blink 1s infinite step-end; color: #fff; margin-top: 20px; }
+.start-content h1 { font-size: 4rem; color: var(--gb-darkest); margin: 0; text-shadow: 2px 2px var(--gb-light); }
+.blink { animation: blink 1s infinite step-end; color: var(--gb-darkest); margin-top: 20px; }
 @keyframes blink { 50% { opacity: 0; } }
 #toast-area { position: absolute; top: 10px; width: 100%; text-align: center; }
-.toast { display: inline-block; background: #000; border: 1px solid var(--neon-cyan); color: var(--neon-cyan); padding: 5px 10px; border-radius: 5px; animation: fadeOut 2s forwards; }
+.toast { display: inline-block; background: var(--gb-lightest); border: 1px solid var(--gb-darkest); color: var(--gb-darkest); padding: 5px 10px; border-radius: 5px; animation: fadeOut 2s forwards; }
 @keyframes fadeOut { 0% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
