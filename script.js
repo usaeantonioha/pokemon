@@ -1,17 +1,48 @@
-/* =========================================
-   POKÉMON RED/BLUE STYLE ENGINE
-   ========================================= */
-
 // --- CONFIGURACIÓN ---
 const CFG = { W: 320, H: 288, TILE: 32 };
 
+// Historia del juego - diálogos y eventos
+const STORY = {
+    intro: [
+        "¡Despierta! El Prof. OAK te espera.",
+        "Hoy recibes tu primer POKÉMON.",
+        "¡Elige sabiamente!"
+    ],
+    afterStarter: [
+        "¡Excelente elección!",
+        "Viaja por la región y derrota al líder.",
+        "¡Encuentra a MEWTWO en la cueva!"
+    ],
+    bossIntro: [
+        "¡ALTO! Soy el líder GARY.",
+        "¡Demuestra tu valor en batalla!",
+        "¡MEWTWO es el más fuerte!"
+    ],
+    bossDefeat: [
+        "¡Increíble! Eres muy fuerte.",
+        "¡Eres el nuevo CAMPEÓN!",
+        "¡Gracias por jugar!"
+    ]
+};
+
 // Tabla de efectividad de tipos (estilo Pokémon)
 const TYPE_CHART = {
-    'Normal': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1},
-    'Fuego': {'Normal': 1, 'Fuego': 0.5, 'Agua': 0.5, 'Planta': 2, 'Eléctrico': 1},
-    'Agua': {'Normal': 1, 'Fuego': 2, 'Agua': 0.5, 'Planta': 0.5, 'Eléctrico': 1},
-    'Planta': {'Normal': 1, 'Fuego': 0.5, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 1},
-    'Eléctrico': {'Normal': 1, 'Fuego': 1, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 0.5}
+    'Normal': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 1, 'Bicho': 1, 'Roca': 1, 'Fantasma': 0, 'Dragón': 1, 'Acero': 0.5},
+    'Fuego': {'Normal': 1, 'Fuego': 0.5, 'Agua': 0.5, 'Planta': 2, 'Eléctrico': 1, 'Hielo': 2, 'Lucha': 1, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 1, 'Bicho': 2, 'Roca': 0.5, 'Fantasma': 1, 'Dragón': 0.5, 'Acero': 2},
+    'Agua': {'Normal': 1, 'Fuego': 2, 'Agua': 0.5, 'Planta': 0.5, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 1, 'Tierra': 2, 'Volador': 1, 'Psíquico': 1, 'Bicho': 1, 'Roca': 2, 'Fantasma': 1, 'Dragón': 0.5, 'Acero': 1},
+    'Planta': {'Normal': 1, 'Fuego': 0.5, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 0.5, 'Tierra': 2, 'Volador': 0.5, 'Psíquico': 1, 'Bicho': 0.5, 'Roca': 2, 'Fantasma': 1, 'Dragón': 0.5, 'Acero': 0.5},
+    'Eléctrico': {'Normal': 1, 'Fuego': 1, 'Agua': 2, 'Planta': 0.5, 'Eléctrico': 0.5, 'Hielo': 1, 'Lucha': 1, 'Veneno': 1, 'Tierra': 0, 'Volador': 2, 'Psíquico': 1, 'Bicho': 1, 'Roca': 1, 'Fantasma': 1, 'Dragón': 0.5, 'Acero': 1},
+    'Hielo': {'Normal': 1, 'Fuego': 0.5, 'Agua': 0.5, 'Planta': 2, 'Eléctrico': 1, 'Hielo': 0.5, 'Lucha': 1, 'Veneno': 1, 'Tierra': 2, 'Volador': 2, 'Psíquico': 1, 'Bicho': 1, 'Roca': 1, 'Fantasma': 1, 'Dragón': 2, 'Acero': 0.5},
+    'Lucha': {'Normal': 2, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 2, 'Lucha': 1, 'Veneno': 0.5, 'Tierra': 1, 'Volador': 0.5, 'Psíquico': 0.5, 'Bicho': 0.5, 'Roca': 2, 'Fantasma': 0, 'Dragón': 1, 'Acero': 2},
+    'Veneno': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 2, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 0.5, 'Tierra': 0.5, 'Volador': 1, 'Psíquico': 1, 'Bicho': 1, 'Roca': 0.5, 'Fantasma': 0.5, 'Dragón': 1, 'Acero': 0},
+    'Tierra': {'Normal': 1, 'Fuego': 2, 'Agua': 1, 'Planta': 0.5, 'Eléctrico': 2, 'Hielo': 1, 'Lucha': 1, 'Veneno': 2, 'Tierra': 1, 'Volador': 0, 'Psíquico': 1, 'Bicho': 0.5, 'Roca': 2, 'Fantasma': 1, 'Dragón': 1, 'Acero': 2},
+    'Volador': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 2, 'Eléctrico': 0.5, 'Hielo': 1, 'Lucha': 2, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 1, 'Bicho': 2, 'Roca': 0.5, 'Fantasma': 1, 'Dragón': 1, 'Acero': 0.5},
+    'Psíquico': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 2, 'Veneno': 2, 'Tierra': 1, 'Volador': 1, 'Psíquico': 0.5, 'Bicho': 1, 'Roca': 1, 'Fantasma': 1, 'Dragón': 1, 'Acero': 0.5},
+    'Bicho': {'Normal': 1, 'Fuego': 0.5, 'Agua': 1, 'Planta': 2, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 0.5, 'Veneno': 0.5, 'Tierra': 1, 'Volador': 0.5, 'Psíquico': 2, 'Bicho': 1, 'Roca': 1, 'Fantasma': 0.5, 'Dragón': 1, 'Acero': 0.5},
+    'Roca': {'Normal': 1, 'Fuego': 2, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 2, 'Lucha': 0.5, 'Veneno': 1, 'Tierra': 0.5, 'Volador': 2, 'Psíquico': 1, 'Bicho': 2, 'Roca': 1, 'Fantasma': 1, 'Dragón': 1, 'Acero': 0.5},
+    'Fantasma': {'Normal': 0, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 2, 'Bicho': 1, 'Roca': 1, 'Fantasma': 2, 'Dragón': 1, 'Acero': 1},
+    'Dragón': {'Normal': 1, 'Fuego': 1, 'Agua': 1, 'Planta': 1, 'Eléctrico': 1, 'Hielo': 1, 'Lucha': 1, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 1, 'Bicho': 1, 'Roca': 1, 'Fantasma': 1, 'Dragón': 2, 'Acero': 0.5},
+    'Acero': {'Normal': 1, 'Fuego': 0.5, 'Agua': 0.5, 'Planta': 1, 'Eléctrico': 0.5, 'Hielo': 2, 'Lucha': 1, 'Veneno': 1, 'Tierra': 1, 'Volador': 1, 'Psíquico': 1, 'Bicho': 1, 'Roca': 2, 'Fantasma': 1, 'Dragón': 1, 'Acero': 0.5}
 };
 
 function getTypeEffectiveness(moveType, defenderType) {
@@ -20,14 +51,33 @@ function getTypeEffectiveness(moveType, defenderType) {
 }
 
 const DB = {
-    // 151 Monstruos + Omegear - IDs corregidos
+    // 151 Monstruos actualizados con más detalles y tipos correctos
     monsters: {
         1: { name: "BULBASAUR", type: "Planta", maxHp: 45, atk: 12, def: 10, moves: [0, 3], id: 1 },
         4: { name: "CHARMANDER", type: "Fuego", maxHp: 39, atk: 14, def: 9, moves: [1, 5], id: 4 },
         7: { name: "SQUIRTLE", type: "Agua", maxHp: 44, atk: 11, def: 13, moves: [2, 6], id: 7 },
         25: { name: "PIKACHU", type: "Eléctrico", maxHp: 35, atk: 15, def: 8, moves: [0, 7], id: 25 },
-        99: { name: "RATTATA", type: "Normal", maxHp: 30, atk: 10, def: 8, moves: [0, 4], id: 99 },
-        150: { name: "MEWTWO", type: "Normal", maxHp: 150, atk: 25, def: 20, moves: [8, 5], id: 150 }
+        16: { name: "PIDGEY", type: "Volador", maxHp: 40, atk: 11, def: 8, moves: [0, 9], id: 16 },
+        19: { name: "RATTATA", type: "Normal", maxHp: 30, atk: 10, def: 8, moves: [0, 4], id: 19 },
+        23: { name: "EKANS", type: "Veneno", maxHp: 35, atk: 12, def: 9, moves: [0, 10], id: 23 },
+        27: { name: "SANDSHREW", type: "Tierra", maxHp: 50, atk: 13, def: 14, moves: [0, 11], id: 27 },
+        37: { name: "VULPIX", type: "Fuego", maxHp: 38, atk: 10, def: 10, moves: [1, 12], id: 37 },
+        52: { name: "MEOWTH", type: "Normal", maxHp: 40, atk: 12, def: 9, moves: [0, 4], id: 52 },
+        54: { name: "PSYDUCK", type: "Agua", maxHp: 50, atk: 14, def: 9, moves: [2, 13], id: 54 },
+        58: { name: "GROWLITHE", type: "Fuego", maxHp: 55, atk: 15, def: 10, moves: [1, 5], id: 58 },
+        63: { name: "ABRA", type: "Psíquico", maxHp: 25, atk: 20, def: 6, moves: [13, 14], id: 63 },
+        66: { name: "MACHOP", type: "Lucha", maxHp: 70, atk: 16, def: 11, moves: [0, 15], id: 66 },
+        74: { name: "GEODUDE", type: "Roca", maxHp: 40, atk: 15, def: 16, moves: [0, 11], id: 74 },
+        92: { name: "GASTLY", type: "Fantasma", maxHp: 30, atk: 18, def: 7, moves: [16, 17], id: 92 },
+        95: { name: "ONIX", type: "Roca", maxHp: 35, atk: 9, def: 20, moves: [0, 11], id: 95 },
+        104: { name: "CUBONE", type: "Tierra", maxHp: 50, atk: 13, def: 12, moves: [0, 11], id: 104 },
+        129: { name: "MAGIKARP", type: "Agua", maxHp: 20, atk: 4, def: 8, moves: [0, 4], id: 129 },
+        130: { name: "GYARADOS", type: "Agua", maxHp: 95, atk: 25, def: 16, moves: [2, 18], id: 130 },
+        131: { name: "LAPRAS", type: "Agua", maxHp: 130, atk: 17, def: 15, moves: [2, 19], id: 131 },
+        133: { name: "EEVEE", type: "Normal", maxHp: 55, atk: 13, def: 11, moves: [0, 4], id: 133 },
+        143: { name: "SNORLAX", type: "Normal", maxHp: 160, atk: 22, def: 13, moves: [0, 20], id: 143 },
+        147: { name: "DRATINI", type: "Dragón", maxHp: 41, atk: 14, def: 9, moves: [0, 21], id: 147 },
+        150: { name: "MEWTWO", type: "Psíquico", maxHp: 106, atk: 30, def: 20, moves: [13, 22], id: 150 }
     },
     moves: [
         {name: "PLACAJE", pwr: 40, type: "Normal"},
@@ -35,35 +85,58 @@ const DB = {
         {name: "BURBUJA", pwr: 40, type: "Agua"},
         {name: "HOJA", pwr: 45, type: "Planta"},
         {name: "LÁTIGO", pwr: 0, type: "Normal"},
-        {name: "LLAMARADA", pwr: 50, type: "Fuego"},
-        {name: "CHORRO", pwr: 50, type: "Agua"},
+        {name: "LLAMARADA", pwr: 90, type: "Fuego"},
+        {name: "CHORRO", pwr: 90, type: "Agua"},
         {name: "CHISPA", pwr: 45, type: "Eléctrico"},
-        {name: "PSÍQUICO", pwr: 60, type: "Normal"}
+        {name: "PSÍQUICO", pwr: 90, type: "Psíquico"},
+        {name: "REMOLINO", pwr: 35, type: "Volador"},
+        {name: "MORDISCO", pwr: 60, type: "Normal"},
+        {name: "TERREMOTO", pwr: 100, type: "Tierra"},
+        {name: "GIRO FUEGO", pwr: 35, type: "Fuego"},
+        {name: "CONFUSIÓN", pwr: 50, type: "Psíquico"},
+        {name: "TELETRANSP.", pwr: 0, type: "Psíquico"},
+        {name: "SUMISIÓN", pwr: 80, type: "Lucha"},
+        {name: "RAYO", pwr: 40, type: "Eléctrico"},
+        {name: "NIEBLA", pwr: 30, type: "Fantasma"},
+        {name: "HIDROBOMBA", pwr: 110, type: "Agua"},
+        {name: "HIPO RAYO", pwr: 150, type: "Normal"},
+        {name: "DESCANSO", pwr: 0, type: "Normal"},
+        {name: "DRAGO ALIENTO", pwr: 60, type: "Dragón"},
+        {name: "BOLA SOMBRÍA", pwr: 80, type: "Fantasma"}
     ],
     items: {
         'potion': { name: "Poción", heal: 20 },
+        'super_potion': { name: "Super Poción", heal: 50 },
+        'hyper_potion': { name: "Hiper Poción", heal: 200 },
         'cube': { name: "Poké Ball", type: "ball", rate: 1.5 },
+        'great_ball': { name: "Super Ball", type: "ball", rate: 2.0 },
+        'ultra_ball': { name: "Ultra Ball", type: "ball", rate: 2.5 },
+        'revive': { name: "Revivir", revive: true },
+        'antidote': { name: "Antídoto", cure: 'poison' },
         'key_alpha': { name: "Chip Alpha", key: true }
     }
 };
 
-const PREFIX = ["BULBA", "CHAR", "SQUIRT", "PIKA", "RATTA", "MEW"];
-const SUFFIX = ["SAUR", "MANDER", "TLE", "CHU", "TATA", "TWO"];
+const PREFIX = ["BULBA", "CHAR", "SQUIRT", "PIKA", "RATTA", "MEW", "PIDGE", "EKAN", "SAND", "VULP", "MEOW", "PSY", "GROWL", "ABRA", "MACHOP", "GEO", "GAST", "ONIX", "CUBONE", "MAGI", "GYARA", "LAPRA", "EEVEE", "SNOR", "DRAT"];
+const SUFFIX = ["SAUR", "MANDER", "TLE", "CHU", "TATA", "TWO", "TTY", "S", "REW", "PIX", "TH", "DUCK", "ITHE", "", "", "DUDE", "LY", "", "E", "KARP", "DOS", "S", "", "LAX", "INI"];
+const MONSTER_TYPES = ["Normal", "Fuego", "Agua", "Planta", "Eléctrico", "Hielo", "Lucha", "Veneno", "Tierra", "Volador", "Psíquico", "Bicho", "Roca", "Fantasma", "Dragón"];
+
 function getMonster(id) {
     if(DB.monsters[id]) {
         const mon = DB.monsters[id];
         return JSON.parse(JSON.stringify(mon));
     }
-    // Generar monstruo aleatorio con ID correcto
+    // Generar monstruo aleatorio con ID correcto y tipo variado
     const seed = id * 1337;
     const name = PREFIX[id % PREFIX.length] + SUFFIX[(id*3) % SUFFIX.length];
+    const type = MONSTER_TYPES[id % MONSTER_TYPES.length];
     return { 
         name: name, 
-        type: "Normal", 
-        maxHp: 40 + (id%20), 
-        atk: 10+(id%5), 
-        def: 10+(id%5), 
-        moves:[0,4],
+        type: type, 
+        maxHp: 40 + (id%30), 
+        atk: 10+(id%8), 
+        def: 10+(id%8), 
+        moves:[0, (id % DB.moves.length)],
         id: id  // FIX: Añadir ID al monstruo generado
     };
 }
@@ -73,7 +146,14 @@ const State = {
     started: false, mode: 'START', mapId: 'room', lastTime: 0,
     player: { 
         x: 3, y: 3, dir: 0, isMoving: false, moveProg: 0, 
-        team: [], bag: { 'potion': 5, 'cube': 3 }, 
+        team: [], bag: { 
+            'potion': 5, 
+            'super_potion': 2,
+            'cube': 10, 
+            'great_ball': 3,
+            'ultra_ball': 1,
+            'revive': 2
+        }, 
         story: 0, badges: [] 
     },
     battle: { enemy: null, turn: 'player', isTrainer: false },
@@ -245,15 +325,23 @@ const Game = {
         State.lastTime = performance.now();
         requestAnimationFrame(Game.loop);
 
+        // Mostrar historia de introducción
         State.mode = 'DIALOG';
-        UI.dialog("¡Despierta! Hoy recibes tu primer monstruo.");
-        setTimeout(() => {
-            UI.hideDialog();
-            if(State.player.story === 0) {
-                State.mode = 'MENU';
-                document.getElementById('starter-selection').classList.remove('hidden');
-            } else { State.mode = 'EXPLORE'; }
-        }, 1500);
+        let dialogIndex = 0;
+        const showNextIntro = () => {
+            if(dialogIndex < STORY.intro.length) {
+                UI.dialog(STORY.intro[dialogIndex]);
+                dialogIndex++;
+                setTimeout(showNextIntro, 2000);
+            } else {
+                UI.hideDialog();
+                if(State.player.story === 0) {
+                    State.mode = 'MENU';
+                    document.getElementById('starter-selection').classList.remove('hidden');
+                } else { State.mode = 'EXPLORE'; }
+            }
+        };
+        showNextIntro();
         
         window.history.pushState({page:1}, "", "");
         window.onpopstate = function(e) { window.history.pushState({page:1}, "", ""); Game.togglePause(); };
@@ -265,9 +353,21 @@ const Game = {
         State.player.team.push(starter);
         State.player.story = 1;
         document.getElementById('starter-selection').classList.add('hidden');
+        
+        // Mostrar historia después de elegir starter
         State.mode = 'DIALOG';
-        UI.dialog(`¡Recibiste a ${mon.name}!`);
-        setTimeout(() => { UI.hideDialog(); State.mode = 'EXPLORE'; }, 1500);
+        let dialogIndex = 0;
+        const showNextStory = () => {
+            if(dialogIndex < STORY.afterStarter.length) {
+                UI.dialog(STORY.afterStarter[dialogIndex]);
+                dialogIndex++;
+                setTimeout(showNextStory, 2000);
+            } else {
+                UI.hideDialog();
+                State.mode = 'EXPLORE';
+            }
+        };
+        showNextStory();
     },
     loop: function(timestamp) {
         const dt = (timestamp - State.lastTime) / 1000;
@@ -368,20 +468,93 @@ const Game = {
         b.classList.remove('hidden');
         const list = document.getElementById('bag-list');
         list.innerHTML = '';
-        for(let k in State.player.bag) {
+        
+        // Lista ordenada de items prioritarios
+        const itemOrder = ['ultra_ball', 'great_ball', 'cube', 'hyper_potion', 'super_potion', 'potion', 'revive', 'antidote'];
+        
+        for(let k of itemOrder) {
             const item = DB.items[k];
-            const count = State.player.bag[k];
+            const count = State.player.bag[k] || 0;
             if(count > 0) {
                 const btn = document.createElement('button');
                 btn.className = 'cyber-btn-menu';
                 btn.innerText = `${item.name} x${count}`;
+                btn.onclick = () => Game.useItem(k);
                 list.appendChild(btn);
             }
+        }
+        
+        // Mostrar otros items no listados
+        for(let k in State.player.bag) {
+            if(!itemOrder.includes(k)) {
+                const item = DB.items[k];
+                const count = State.player.bag[k];
+                if(count > 0) {
+                    const btn = document.createElement('button');
+                    btn.className = 'cyber-btn-menu';
+                    btn.innerText = `${item.name} x${count}`;
+                    btn.onclick = () => Game.useItem(k);
+                    list.appendChild(btn);
+                }
+            }
+        }
+    },
+    useItem: function(itemKey) {
+        const item = DB.items[itemKey];
+        const playerMon = State.player.team[0];
+        
+        if(item.heal) {
+            // Poción
+            playerMon.hp = Math.min(playerMon.maxHp, playerMon.hp + item.heal);
+            State.player.bag[itemKey]--;
+            UI.dialog(`¡Usaste ${item.name}!`);
+            Battle.updateUI();
+            setTimeout(() => { 
+                if(State.mode === 'BATTLE') {
+                    State.battle.turn = 'enemy'; 
+                    Battle.enemyTurn(); 
+                } else {
+                    Game.closeBag();
+                }
+            }, 1000);
+        } else if(item.revive) {
+            // Revivir - buscar primer monstruo debilitado
+            const faintedMon = State.player.team.find(m => m.hp <= 0);
+            if(faintedMon) {
+                faintedMon.hp = Math.floor(faintedMon.maxHp * 0.5);
+                State.player.bag[itemKey]--;
+                UI.dialog(`¡${faintedMon.name} revivió!`);
+                setTimeout(() => Game.closeBag(), 1500);
+            } else {
+                UI.dialog("Todos tus Pokémon están sanos.");
+                setTimeout(() => Game.closeBag(), 1000);
+            }
+        } else {
+            UI.dialog(`No se puede usar ${item.name} aquí.`);
+            setTimeout(() => Game.closeBag(), 1000);
         }
     },
     closeBag: function() {
         document.getElementById('bag-menu').classList.add('hidden');
         document.getElementById('pause-menu').classList.remove('hidden');
+    },
+    showTeam: function() {
+        document.getElementById('pause-menu').classList.add('hidden');
+        const b = document.getElementById('bag-menu');
+        b.classList.remove('hidden');
+        const list = document.getElementById('bag-list');
+        list.innerHTML = '';
+        
+        State.player.team.forEach((mon, i) => {
+            const div = document.createElement('div');
+            div.style.cssText = 'margin-bottom: 8px; padding: 5px; border: 1px solid var(--gb-darkest);';
+            div.innerHTML = `
+                <div style="font-weight:bold;">${i+1}. ${mon.name} Lv.${mon.level || 5}</div>
+                <div>${mon.type} | HP: ${Math.floor(mon.hp)}/${mon.maxHp}</div>
+                <div>ATK: ${mon.atk} | DEF: ${mon.def}</div>
+            `;
+            list.appendChild(div);
+        });
     },
     saveGame: function() { localStorage.setItem('neosSave', JSON.stringify(State.player)); UI.toast("¡Guardado!"); Game.togglePause(); },
     exportSave: function() { const s = btoa(JSON.stringify(State.player)); prompt("Código:", s); }
@@ -398,15 +571,43 @@ const Battle = {
         
         State.battle.isTrainer = isBoss;
         
-        const id = isBoss ? 150 : Math.floor(Math.random()*20)+1;
+        // Boss usa MEWTWO, enemigos salvajes aleatorios de la lista expandida
+        const wildIds = [16, 19, 23, 27, 37, 52, 54, 58, 63, 66, 74, 92, 95, 104, 129, 133];
+        const id = isBoss ? 150 : wildIds[Math.floor(Math.random() * wildIds.length)];
         const base = getMonster(id);
-        const lvl = isBoss ? 10 : 3;
-        State.battle.enemy = { ...base, level: lvl, hp: base.maxHp*lvl/5, maxHp: base.maxHp*lvl/5 };
+        const lvl = isBoss ? 25 : (Math.floor(Math.random()*3)+3); // Nivel 3-5 para salvajes
+        
+        // Fórmula correcta de HP estilo Pokémon
+        const maxHp = Math.floor((base.maxHp * 2 * lvl) / 100) + lvl + 10;
+        State.battle.enemy = { 
+            ...base, 
+            level: lvl, 
+            hp: maxHp, 
+            maxHp: maxHp,
+            atk: Math.floor((base.atk * lvl) / 50) + 5,
+            def: Math.floor((base.def * lvl) / 50) + 5
+        };
         State.battle.turn = 'player';
         
         this.updateUI();
-        UI.dialog(`¡${base.name} ${isBoss ? 'JEFE' : 'salvaje'}!`);
-        setTimeout(() => UI.hideDialog(), 1500);
+        
+        // Diálogo de historia para el boss
+        if(isBoss) {
+            let dialogIndex = 0;
+            const showBossDialog = () => {
+                if(dialogIndex < STORY.bossIntro.length) {
+                    UI.dialog(STORY.bossIntro[dialogIndex]);
+                    dialogIndex++;
+                    setTimeout(showBossDialog, 2000);
+                } else {
+                    UI.hideDialog();
+                }
+            };
+            showBossDialog();
+        } else {
+            UI.dialog(`¡${base.name} salvaje!`);
+            setTimeout(() => UI.hideDialog(), 1500);
+        }
     },
     updateUI: function() {
         const p = State.player.team[0]; const e = State.battle.enemy;
@@ -438,65 +639,197 @@ const Battle = {
         document.getElementById('battle-menu').classList.remove('hidden');
     },
     inputBag: function() {
-        // Simple implementación de uso de poción
-        if(State.player.bag['potion'] > 0) {
-            State.player.bag['potion']--;
-            State.player.team[0].hp += 20;
-            if(State.player.team[0].hp > State.player.team[0].maxHp) State.player.team[0].hp = State.player.team[0].maxHp;
-            Battle.updateUI();
-            UI.dialog("¡Usaste Poción!");
-            setTimeout(() => { State.battle.turn='enemy'; Battle.enemyTurn(); }, 1000);
-        } else UI.dialog("¡No tienes pociones!");
+        // Redirigir al sistema de items mejorado
+        Game.showBag();
     },
     tryCatch: function() {
         if(State.battle.isTrainer) { UI.dialog("¡No puedes robar!"); return; }
-        if(State.player.bag['cube'] > 0) {
-            State.player.bag['cube']--;
-            UI.dialog("¡Lanzaste Neo-Cube!");
+        const ballType = State.player.bag['ultra_ball'] > 0 ? 'ultra_ball' : 
+                         State.player.bag['great_ball'] > 0 ? 'great_ball' : 'cube';
+        
+        if(State.player.bag[ballType] > 0) {
+            State.player.bag[ballType]--;
+            const ballName = DB.items[ballType].name;
+            UI.dialog(`¡Lanzaste ${ballName}!`);
             setTimeout(() => {
-                if(Math.random() > 0.5) {
+                // Fórmula de captura mejorada basada en HP restante
+                const hpPercent = State.battle.enemy.hp / State.battle.enemy.maxHp;
+                const catchRate = DB.items[ballType].rate * (1 - hpPercent * 0.7);
+                
+                if(Math.random() < catchRate) {
                     UI.dialog("¡Capturado!");
-                    State.player.team.push(JSON.parse(JSON.stringify(State.battle.enemy)));
+                    // Añadir monstruo capturado con ID correcto y stats calculados
+                    const capturedMon = {
+                        ...State.battle.enemy,
+                        hp: State.battle.enemy.maxHp, // Curar al capturar
+                        id: State.battle.enemy.id
+                    };
+                    State.player.team.push(capturedMon);
                     setTimeout(Battle.end, 2000);
                 } else {
                     UI.dialog("¡Escapó!");
                     setTimeout(() => { State.battle.turn='enemy'; Battle.enemyTurn(); }, 1000);
                 }
             }, 1000);
-        } else UI.dialog("¡Sin Cubes!");
+        } else UI.dialog("¡Sin Balls!");
     },
     useMove: function(idx) {
         if(State.battle.turn !== 'player') return;
         this.showMain(); document.getElementById('battle-menu').classList.add('hidden');
-        const move = DB.moves[State.player.team[0].moves[idx]];
-        UI.dialog(`¡${move.name}!`);
+        const playerMon = State.player.team[0];
+        const move = DB.moves[playerMon.moves[idx]];
+        
+        UI.dialog(`¡${playerMon.name} usó ${move.name}!`);
+        
         setTimeout(() => {
-            const dmg = 10; // Simplificado
-            State.battle.enemy.hp -= dmg;
+            // Fórmula de daño completa estilo Pokémon
+            // damage = (((2 * level / 5 + 2) * power * A / D) / 50 + 2) * modifier
+            const level = playerMon.level || 5;
+            const A = playerMon.atk || 10;
+            const D = State.battle.enemy.def || 10;
+            
+            let baseDamage = (((2 * level / 5 + 2) * move.pwr * A / D) / 50 + 2);
+            
+            // STAB bonus (Same Type Attack Bonus) - 1.5x si el tipo coincide
+            const stab = (move.type === playerMon.type) ? 1.5 : 1;
+            
+            // Efectividad de tipos
+            const effectiveness = getTypeEffectiveness(move.type, State.battle.enemy.type);
+            
+            // Factor aleatorio (0.85 a 1.0)
+            const randomFactor = (Math.floor(Math.random() * 16) + 85) / 100;
+            
+            // Daño final
+            const damage = Math.floor(baseDamage * stab * effectiveness * randomFactor);
+            
+            State.battle.enemy.hp -= damage;
             Battle.updateUI();
-            if(State.battle.enemy.hp <= 0) setTimeout(Battle.win, 1000);
-            else { State.battle.turn = 'enemy'; setTimeout(Battle.enemyTurn, 1000); }
+            
+            // Mostrar mensaje de efectividad
+            if(effectiveness > 1) {
+                UI.toast("¡Es súper efectivo!");
+            } else if(effectiveness < 1 && effectiveness > 0) {
+                UI.toast("No es muy efectivo...");
+            } else if(effectiveness === 0) {
+                UI.toast("No tiene efecto...");
+            }
+            
+            if(State.battle.enemy.hp <= 0) {
+                State.battle.enemy.hp = 0;
+                Battle.updateUI();
+                setTimeout(Battle.win, 1000);
+            } else { 
+                State.battle.turn = 'enemy'; 
+                setTimeout(Battle.enemyTurn, 1000); 
+            }
         }, 1000);
     },
     enemyTurn: function() {
-        UI.dialog("¡Enemigo ataca!");
+        const enemy = State.battle.enemy;
+        const playerMon = State.player.team[0];
+        
+        // El enemigo elige un movimiento aleatorio
+        const moveIdx = Math.floor(Math.random() * enemy.moves.length);
+        const move = DB.moves[enemy.moves[moveIdx]];
+        
+        UI.dialog(`¡${enemy.name} usó ${move.name}!`);
+        
         setTimeout(() => {
-            State.player.team[0].hp -= 5;
+            // Fórmula de daño para el enemigo
+            const level = enemy.level || 5;
+            const A = enemy.atk || 10;
+            const D = playerMon.def || 10;
+            
+            let baseDamage = (((2 * level / 5 + 2) * move.pwr * A / D) / 50 + 2);
+            
+            // STAB bonus
+            const stab = (move.type === enemy.type) ? 1.5 : 1;
+            
+            // Efectividad de tipos
+            const effectiveness = getTypeEffectiveness(move.type, playerMon.type);
+            
+            // Factor aleatorio
+            const randomFactor = (Math.floor(Math.random() * 16) + 85) / 100;
+            
+            // Daño final
+            const damage = Math.floor(baseDamage * stab * effectiveness * randomFactor);
+            
+            playerMon.hp -= damage;
             Battle.updateUI();
-            if(State.player.team[0].hp <= 0) { UI.dialog("Debilitado..."); setTimeout(Battle.end, 2000); }
-            else { State.battle.turn = 'player'; document.getElementById('battle-menu').classList.remove('hidden'); UI.hideDialog(); }
+            
+            // Mostrar mensaje de efectividad
+            if(effectiveness > 1) {
+                UI.toast("¡Es súper efectivo!");
+            } else if(effectiveness < 1 && effectiveness > 0) {
+                UI.toast("No es muy efectivo...");
+            }
+            
+            if(playerMon.hp <= 0) {
+                playerMon.hp = 0;
+                Battle.updateUI();
+                UI.dialog(`${playerMon.name} se debilitó...`);
+                
+                // Verificar si hay más monstruos en el equipo
+                const hasMoreMons = State.player.team.some(m => m.hp > 0);
+                if(hasMoreMons) {
+                    // En una versión completa, cambiarías al siguiente monstruo
+                    UI.dialog("¡Game Over! (Demo)");
+                    setTimeout(Battle.end, 2000);
+                } else {
+                    UI.dialog("¡Game Over! (Demo)");
+                    setTimeout(Battle.end, 2000);
+                }
+            } else { 
+                State.battle.turn = 'player'; 
+                document.getElementById('battle-menu').classList.remove('hidden'); 
+                UI.hideDialog(); 
+            }
         }, 1000);
     },
     win: function() {
         const p = State.player.team[0];
-        p.xp += 20;
-        if(p.xp >= p.maxXp) { p.level++; p.xp=0; p.maxHp+=5; p.hp=p.maxHp; UI.dialog(`¡Nivel ${p.level}!`); } 
-        else { UI.dialog("¡Ganaste! +20 XP"); }
+        const e = State.battle.enemy;
+        
+        // XP basada en nivel del enemigo derrotado
+        const xpGain = Math.floor(e.level * 10);
+        p.xp += xpGain;
+        
+        if(p.xp >= p.maxXp) { 
+            p.level++; 
+            p.xp = 0; 
+            p.maxXp = p.level * 50;
+            
+            // Subir stats al level up (fórmula RPG)
+            const hpGain = Math.floor(p.maxHp * 0.1) + 2;
+            const atkGain = Math.floor(p.atk * 0.1) + 1;
+            const defGain = Math.floor(p.def * 0.1) + 1;
+            
+            p.maxHp += hpGain;
+            p.hp = p.maxHp; // Curar HP al subir nivel
+            p.atk += atkGain;
+            p.def += defGain;
+            
+            UI.dialog(`¡${p.name} subió a Nivel ${p.level}!`);
+            setTimeout(() => {
+                UI.toast(`+${hpGain} HP, +${atkGain} ATK, +${defGain} DEF`);
+            }, 500);
+        } else { 
+            UI.dialog(`¡Ganaste! +${xpGain} XP`); 
+        }
         
         if(State.battle.isTrainer) {
             setTimeout(() => {
-                UI.dialog("¡JUEGO COMPLETADO!"); // Fin de la demo
-                setTimeout(Battle.end, 3000);
+                let dialogIndex = 0;
+                const showVictoryDialog = () => {
+                    if(dialogIndex < STORY.bossDefeat.length) {
+                        UI.dialog(STORY.bossDefeat[dialogIndex]);
+                        dialogIndex++;
+                        setTimeout(showVictoryDialog, 2000);
+                    } else {
+                        setTimeout(Battle.end, 2000);
+                    }
+                };
+                showVictoryDialog();
             }, 2000);
         } else {
             setTimeout(Battle.end, 2000);
